@@ -1,0 +1,28 @@
+{
+  "name": "hivemind",
+  "version": "0.1.0",
+  "description": "Multi-agent coordination system for Claude Code",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "hivemind": "./dist/cli.js",
+    "hivemind-mcp": "./dist/mcp/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "mcp": "bun run src/mcp/server.ts",
+    "cli": "bun run src/cli.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
+    "@types/bun": "latest",
+    "typescript": "^5.3.0"
+  }
+}
