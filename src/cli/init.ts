@@ -13,6 +13,7 @@ import { getGitInfo } from '../git/getGitInfo';
 import { initializeDb } from '../db/initializeDb';
 import { getProjectPaths } from '../db/getProjectPaths';
 import { initClaudeConfig } from '../init/claudeConfig';
+import { isMcpRegistered } from './registerMcp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HIVEMIND_ROOT = join(__dirname, '../..');
@@ -74,11 +75,18 @@ export async function initCommand(options: InitOptions) {
     console.log('\n[2/2] Claude Config (skipped)');
   }
 
+  // Check if MCP is set up globally
+  const mcpReady = await isMcpRegistered();
+
   // Success
   console.log('\n---');
-  console.log('Project registered! Restart Claude Code to activate.');
-  console.log('\nNext session will:');
-  console.log('  - Auto-register as a hivemind agent');
-  console.log('  - Have hivemind MCP tools available');
-  console.log('  - Follow 001-style task numbering');
+  if (mcpReady) {
+    console.log('Project registered! Restart Claude Code to activate.');
+    console.log('\nNext session will:');
+    console.log('  - Auto-register as a hivemind agent');
+    console.log('  - Have hivemind MCP tools available');
+  } else {
+    console.log('Project registered, but MCP not set up globally.');
+    console.log('\nRun `hivemind install` first to set up MCP tools.');
+  }
 }

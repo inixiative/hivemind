@@ -4,6 +4,7 @@
  * Run from hivemind directory to:
  * 1. Install dependencies
  * 2. Register MCP server globally
+ * 3. Configure permissions
  */
 
 import { dirname, join } from 'path';
@@ -13,6 +14,8 @@ import { registerMcpServer, configurePermissions } from './registerMcp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HIVEMIND_ROOT = join(__dirname, '../..');
+const CLI_ENTRY = join(HIVEMIND_ROOT, 'src/cli.ts');
+
 
 export async function installCommand() {
   console.log('hivemind install\n');
@@ -48,8 +51,10 @@ export async function installCommand() {
 
   // Success
   console.log('\n---');
-  console.log('Hivemind installed globally!');
-  console.log('\nNext steps:');
+  console.log('Hivemind installed!');
+  console.log('\nAdd this to your shell profile (~/.zshrc or ~/.bashrc):');
+  console.log(`\n  alias hivemind='bun run ${CLI_ENTRY}'`);
+  console.log('\nThen:');
   console.log('  cd <your-project>');
-  console.log('  bun run /path/to/hivemind init');
+  console.log('  hivemind init');
 }

@@ -56,8 +56,8 @@ export async function registerMcpServer(hivemindRoot: string): Promise<RegisterR
       };
     }
 
-    // Register the MCP server
-    await $`claude mcp add --transport stdio hivemind -- ${command}`.quiet();
+    // Register the MCP server globally (user scope = available in all projects)
+    await $`claude mcp add --transport stdio --scope user hivemind -- bun run ${serverPath}`.quiet();
 
     return {
       success: true,
