@@ -2,13 +2,41 @@
 
 Multi-agent coordination for Claude Code. Shared event log, plans, and tasks across multiple Claude sessions.
 
-## Quick Start
+## Installation
+
+### From npm (recommended)
 
 ```bash
+npm install -g @inixiative/hivemind
+```
+
+Then add to Claude Code:
+
+```bash
+claude mcp add hivemind -- hivemind-mcp
+```
+
+Or manually add to `~/.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "hivemind": {
+      "command": "hivemind-mcp"
+    }
+  }
+}
+```
+
+### From source
+
+```bash
+git clone https://github.com/inixiative/hivemind.git
+cd hivemind
 ./setup.sh
 ```
 
-That's it. Restart Claude Code and hivemind is active.
+Restart Claude Code and hivemind is active.
 
 On startup, Claude receives context about the hivemind state:
 ```
