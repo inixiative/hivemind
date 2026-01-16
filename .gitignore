@@ -4,3 +4,6 @@ dist/
 *.sqlite-wal
 *.sqlite-shm
 .DS_Store
+.test-db/
+bun.lockb
+.claude/

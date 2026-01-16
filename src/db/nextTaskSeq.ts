@@ -1,9 +1,9 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Get next task sequence number for a plan
  */
-export function nextTaskSeq(db: Database.Database, planId: string): number {
+export function nextTaskSeq(db: Database, planId: string): number {
   const stmt = db.prepare(`
     SELECT COUNT(*) as count
     FROM tasks

@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { makeAgentId } from '../ids/makeAgentId';
 import { parseId } from '../ids/parseId';
 import { now } from '../datetime/now';
@@ -8,7 +8,7 @@ import type { Agent, RegisterAgentInput } from './types';
  * Register a new agent in the hivemind
  */
 export function registerAgent(
-  db: Database.Database,
+  db: Database,
   input: RegisterAgentInput = {}
 ): Agent {
   const id = makeAgentId(input.label);
@@ -16,8 +16,8 @@ export function registerAgent(
   const timestamp = now();
 
   const stmt = db.prepare(`
-    INSERT INTO agents (id, hex, label, status, pid, session_id, worktree_id, context_summary, created_at, last_heartbeat)
-    VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)
+    INSERT INTO agents (id, hex, label, status, pid, session_id, worktree_id, context_summary, created_at)
+    VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)
   `);
 
   stmt.run(
@@ -25,10 +25,9 @@ export function registerAgent(
     parsed.hex,
     parsed.label ?? null,
     input.pid ?? null,
-    input.sessionId ?? null,
-    input.worktreeId ?? null,
-    input.contextSummary ?? null,
-    timestamp,
+    input.session_id ?? null,
+    input.worktree_id ?? null,
+    input.context_summary ?? null,
     timestamp
   );
 
@@ -38,12 +37,11 @@ export function registerAgent(
     label: parsed.label ?? null,
     status: 'active',
     pid: input.pid ?? null,
-    session_id: input.sessionId ?? null,
+    session_id: input.session_id ?? null,
     current_plan_id: null,
     current_task_id: null,
-    worktree_id: input.worktreeId ?? null,
-    context_summary: input.contextSummary ?? null,
+    worktree_id: input.worktree_id ?? null,
+    context_summary: input.context_summary ?? null,
     created_at: timestamp,
-    last_heartbeat: timestamp,
   };
 }

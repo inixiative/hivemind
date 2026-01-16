@@ -1,11 +1,11 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import type { Event } from './types';
 
 /**
  * Get events for a specific branch
  */
 export function getEventsByBranch(
-  db: Database.Database,
+  db: Database,
   branch: string,
   limit = 100
 ): Event[] {

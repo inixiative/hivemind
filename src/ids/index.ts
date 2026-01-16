@@ -1,5 +1,25 @@
 // Types
 export type { IdType, ParsedId } from './types';
+export type {
+  AgentId,
+  PlanId,
+  TaskId,
+  EventId,
+  WorktreeId,
+  HivemindIdType,
+} from './typedIds';
+export {
+  agentId,
+  planId,
+  taskId,
+  eventId,
+  worktreeId,
+  isAgentId,
+  isPlanId,
+  isTaskId,
+  isEventId,
+  isWorktreeId,
+} from './typedIds';
 
 // Generators
 export { generateHex } from './generateHex';

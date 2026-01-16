@@ -17,7 +17,7 @@ Call hivemind_status and present the results clearly:
 
 1. **Active Agents** - Who else is working
    - Agent ID, label, current task
-   - Last heartbeat time
+   - PID (process ID)
    - What they're working on (context_summary)
 
 2. **Worktrees** - Git worktrees being used

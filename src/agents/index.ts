@@ -8,10 +8,8 @@ export { unregisterAgent } from './unregisterAgent';
 // Query
 export { getAgent } from './getAgent';
 export { getActiveAgents } from './getActiveAgents';
-export { getStaleAgents } from './getStaleAgents';
 
 // Updates
-export { updateHeartbeat } from './updateHeartbeat';
 export { updateAgentContext } from './updateAgentContext';
 export { updateAgentTask } from './updateAgentTask';
 export { updateAgentWorktree } from './updateAgentWorktree';

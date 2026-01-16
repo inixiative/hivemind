@@ -18,7 +18,6 @@ export type Agent = {
   worktree_id: string | null;
   context_summary: string | null;
   created_at: string;
-  last_heartbeat: string | null;
 };
 
 /**
@@ -27,7 +26,7 @@ export type Agent = {
 export type RegisterAgentInput = {
   label?: string;
   pid?: number;
-  sessionId?: string;
-  worktreeId?: string;
-  contextSummary?: string;
+  session_id?: string;
+  worktree_id?: string;
+  context_summary?: string;
 };

@@ -1,10 +1,10 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Update an agent's context summary (what it knows/is working on)
  */
 export function updateAgentContext(
-  db: Database.Database,
+  db: Database,
   agentId: string,
   contextSummary: string
 ): boolean {

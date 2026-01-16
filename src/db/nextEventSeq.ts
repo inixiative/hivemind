@@ -1,9 +1,9 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Get next event sequence number (atomic increment)
  */
-export function nextEventSeq(db: Database.Database): number {
+export function nextEventSeq(db: Database): number {
   const stmt = db.prepare(`
     UPDATE sequences
     SET value = value + 1

@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { makeWorktreeId } from '../ids/makeWorktreeId';
 import { parseId } from '../ids/parseId';
 import { now } from '../datetime/now';
@@ -8,7 +8,7 @@ import type { WorktreeRecord, RegisterWorktreeInput } from './types';
  * Register a worktree in the hivemind
  */
 export function registerWorktree(
-  db: Database.Database,
+  db: Database,
   input: RegisterWorktreeInput
 ): WorktreeRecord {
   const id = makeWorktreeId(input.label);
@@ -16,7 +16,7 @@ export function registerWorktree(
   const timestamp = now();
 
   const stmt = db.prepare(`
-    INSERT INTO worktrees (id, hex, label, path, branch, commit, is_main, status, created_at, last_seen)
+    INSERT INTO worktrees (id, hex, label, path, branch, commit_hash, is_main, status, created_at, last_seen)
     VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
   `);
 
@@ -26,8 +26,8 @@ export function registerWorktree(
     parsed.label ?? null,
     input.path,
     input.branch ?? null,
-    input.commit ?? null,
-    input.isMain ? 1 : 0,
+    input.commit_hash ?? null,
+    input.is_main ? 1 : 0,
     timestamp,
     timestamp
   );
@@ -38,8 +38,8 @@ export function registerWorktree(
     label: parsed.label ?? null,
     path: input.path,
     branch: input.branch ?? null,
-    commit: input.commit ?? null,
-    is_main: input.isMain ? 1 : 0,
+    commit_hash: input.commit_hash ?? null,
+    is_main: input.is_main ? 1 : 0,
     status: 'active',
     created_at: timestamp,
     last_seen: timestamp,

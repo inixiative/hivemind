@@ -3,12 +3,13 @@
  */
 export type EventType =
   | 'agent:register'
-  | 'agent:heartbeat'
   | 'agent:unregister'
+  | 'agent:dead'
   | 'worktree:register'
   | 'worktree:switch'
   | 'worktree:stale'
   | 'plan:create'
+  | 'plan:sync'
   | 'plan:join'
   | 'plan:leave'
   | 'plan:complete'
@@ -47,10 +48,10 @@ export type Event = {
  * Input for creating an event
  */
 export type EventInput = {
-  agentId: string;
-  planId?: string;
-  taskId?: string;
-  worktreeId?: string;
+  agent_id?: string; // Optional - defaults to 'system' for automated events
+  plan_id?: string;
+  task_id?: string;
+  worktree_id?: string;
   branch?: string;
   type: EventType;
   content?: string;

@@ -3,11 +3,11 @@
  *
  * Checks:
  *   - Has at least 2 parts (type_hex)
- *   - Type is valid (agt, pln, tsk, evt)
+ *   - Type is valid (agt, pln, tsk, evt, wkt)
  *   - Hex is 6 lowercase hex chars
  */
 export function isValidId(id: string): boolean {
-  const validTypes = ['agt', 'pln', 'tsk', 'evt'];
+  const validTypes = ['agt', 'pln', 'tsk', 'evt', 'wkt'];
   const parts = id.split('_');
 
   if (parts.length < 2) {

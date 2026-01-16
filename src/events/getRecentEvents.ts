@@ -1,10 +1,10 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import type { Event } from './types';
 
 /**
  * Get the most recent events
  */
-export function getRecentEvents(db: Database.Database, limit: number = 50): Event[] {
+export function getRecentEvents(db: Database, limit: number = 50): Event[] {
   const stmt = db.prepare(`
     SELECT * FROM events
     ORDER BY seq DESC

@@ -1,48 +1,117 @@
 /**
  * Session start hook - auto-join hivemind when starting a Claude session
  *
- * This hook can be installed in Claude Code's settings to automatically
- * register the agent when a new session starts.
- *
- * Installation:
- * Add to your Claude Code settings:
- * {
+ * Installation: Add to .claude/settings.json:
  *   "hooks": {
- *     "session_start": "npx hivemind hook:session-start"
+ *     "SessionStart": [{
+ *       "matcher": "startup",
+ *       "hooks": [{ "type": "command", "command": "bun run /path/to/hivemind/src/hooks/sessionStart.ts" }]
+ *     }]
  *   }
- * }
+ *
+ * Claude Code passes JSON via stdin with session_id, transcript_path, cwd, etc.
  */
 
 import { executeJoin } from '../skills/join';
+import { executeStatus } from '../mcp/tools/status';
 import { getGitInfo } from '../git/getGitInfo';
 
-export function runSessionStartHook() {
+type HookInput = {
+  session_id?: string;
+  transcript_path?: string;
+  cwd?: string;
+  permission_mode?: string;
+};
+
+function readStdinSync(): string {
+  try {
+    // Bun supports reading stdin synchronously
+    const chunks: Buffer[] = [];
+    const fd = 0; // stdin
+    const buf = Buffer.alloc(1024);
+    let bytesRead: number;
+
+    // Non-blocking check for stdin data
+    const fs = require('fs');
+    try {
+      while ((bytesRead = fs.readSync(fd, buf, 0, buf.length, null)) > 0) {
+        chunks.push(buf.subarray(0, bytesRead));
+      }
+    } catch {
+      // No more data or stdin not ready
+    }
+
+    return Buffer.concat(chunks).toString('utf-8');
+  } catch {
+    return '';
+  }
+}
+
+export function runSessionStartHook(input?: HookInput) {
   const gitInfo = getGitInfo();
 
-  if (!gitInfo.isRepo) {
-    // Not in a git repo, skip auto-join
-    return {
-      skipped: true,
-      reason: 'Not in a git repository',
-    };
+  if (!gitInfo.isRepo || !gitInfo.repoName) {
+    return;
   }
 
+  const sessionId = input?.session_id;
+  const label = process.env.CLAUDE_AGENT_LABEL;
+
   try {
-    const result = executeJoin({});
-    return {
-      success: true,
-      ...result,
-    };
+    // process.ppid is Claude's process (or close to it in the process tree)
+    const pid = process.ppid;
+
+    const result = executeJoin({
+      label,
+      sessionId,
+      pid,
+    });
+
+    if (result.needsInput) {
+      return;
+    }
+
+    // Get status to show other agents
+    const status = executeStatus({ project: gitInfo.repoName });
+    const otherAgents = status.activeAgents?.filter((a: any) => a.id !== result.agentId) || [];
+
+    // Output agent info for Claude's context
+    const lines = [
+      `hivemind: ${result.agentId} joined ${gitInfo.repoName}`,
+    ];
+
+    if (result.branch) {
+      lines[0] += ` (${result.branch})`;
+    }
+
+    // Include session_id so Claude can use it for MCP calls
+    if (sessionId) {
+      lines.push(`  session: ${sessionId}`);
+    }
+
+    if (otherAgents.length > 0) {
+      lines.push(`  active: ${otherAgents.map((a: any) => a.id).join(', ')}`);
+    }
+
+    console.log(lines.join('\n'));
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
+    console.error(`hivemind error: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 // CLI entry point
-if (require.main === module) {
-  const result = runSessionStartHook();
-  console.log(JSON.stringify(result, null, 2));
+if (import.meta.main) {
+  // Read hook input from stdin (Claude Code passes JSON)
+  const stdin = readStdinSync();
+  let input: HookInput | undefined;
+
+  if (stdin.trim()) {
+    try {
+      input = JSON.parse(stdin);
+    } catch {
+      // Not valid JSON, ignore
+    }
+  }
+
+  runSessionStartHook(input);
 }

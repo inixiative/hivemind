@@ -1,20 +1,20 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { now } from '../datetime/now';
 
 /**
  * Update a worktree's current commit
  */
 export function updateWorktreeCommit(
-  db: Database.Database,
+  db: Database,
   id: string,
-  commit: string
+  commitHash: string
 ): boolean {
   const stmt = db.prepare(`
     UPDATE worktrees
-    SET commit = ?, last_seen = ?
+    SET commit_hash = ?, last_seen = ?
     WHERE id = ?
   `);
 
-  const result = stmt.run(commit, now(), id);
+  const result = stmt.run(commitHash, now(), id);
   return result.changes > 0;
 }

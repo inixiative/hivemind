@@ -1,9 +1,9 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Mark a task as in_progress
  */
-export function startTask(db: Database.Database, taskId: string): boolean {
+export function startTask(db: Database, taskId: string): boolean {
   const stmt = db.prepare(`
     UPDATE tasks
     SET status = 'in_progress'

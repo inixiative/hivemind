@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import { Database } from 'bun:sqlite';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -12,14 +12,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  *
  * Creates directories and runs schema
  */
-export function initializeDb(projectName: string): Database.Database {
+export function initializeDb(projectName: string): Database {
   ensureProjectDirs(projectName);
 
   const paths = getProjectPaths(projectName);
   const db = new Database(paths.dbPath);
 
   // Enable WAL mode for better concurrent access
-  db.pragma('journal_mode = WAL');
+  db.exec('PRAGMA journal_mode = WAL');
 
   // Run schema
   const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf-8');

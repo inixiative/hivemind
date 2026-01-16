@@ -1,20 +1,19 @@
-import type Database from 'better-sqlite3';
-import { now } from '../datetime/now';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Update an agent's worktree assignment
  */
 export function updateAgentWorktree(
-  db: Database.Database,
+  db: Database,
   agentId: string,
   worktreeId: string | null
 ): boolean {
   const stmt = db.prepare(`
     UPDATE agents
-    SET worktree_id = ?, last_heartbeat = ?
+    SET worktree_id = ?
     WHERE id = ?
   `);
 
-  const result = stmt.run(worktreeId, now(), agentId);
+  const result = stmt.run(worktreeId, agentId);
   return result.changes > 0;
 }

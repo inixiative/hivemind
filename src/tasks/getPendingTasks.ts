@@ -1,10 +1,10 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import type { Task } from './types';
 
 /**
  * Get all pending (unclaimed) tasks, optionally filtered by plan
  */
-export function getPendingTasks(db: Database.Database, planId?: string): Task[] {
+export function getPendingTasks(db: Database, planId?: string): Task[] {
   if (planId) {
     const stmt = db.prepare(`
       SELECT * FROM tasks

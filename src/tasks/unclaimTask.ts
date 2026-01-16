@@ -1,9 +1,9 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Unclaim a task (release it back to pending)
  */
-export function unclaimTask(db: Database.Database, taskId: string): boolean {
+export function unclaimTask(db: Database, taskId: string): boolean {
   const stmt = db.prepare(`
     UPDATE tasks
     SET status = 'pending', claimed_by = NULL, claimed_at = NULL

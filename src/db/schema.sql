@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS agents (
   worktree_id TEXT,                       -- wkt_a1b2c3
   context_summary TEXT,                   -- what this agent knows
   created_at TEXT NOT NULL,
-  last_heartbeat TEXT,
 
   FOREIGN KEY (current_plan_id) REFERENCES plans(id),
   FOREIGN KEY (current_task_id) REFERENCES tasks(id),
@@ -28,7 +27,7 @@ CREATE TABLE IF NOT EXISTS worktrees (
   label TEXT,                             -- feature-auth (optional)
   path TEXT NOT NULL UNIQUE,              -- /path/to/worktree
   branch TEXT,                            -- feature/auth
-  commit TEXT,                            -- current commit hash
+  commit_hash TEXT,                       -- current commit hash
   is_main INTEGER DEFAULT 0,              -- 1 if main worktree
   status TEXT DEFAULT 'active',           -- active/stale
   created_at TEXT NOT NULL,
@@ -45,6 +44,7 @@ CREATE TABLE IF NOT EXISTS plans (
   status TEXT DEFAULT 'active',           -- active/paused/complete
   branch TEXT,                            -- associated git branch
   worktree_id TEXT,                       -- associated worktree
+  claude_session_id TEXT,                 -- claude --resume session ID
   created_at TEXT NOT NULL,
   created_by TEXT,                        -- agt_7a3f2b
 
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS events (
   task_id TEXT,                           -- tsk_e9d2c1_001 (optional)
   worktree_id TEXT,                       -- wkt_a1b2c3 (optional)
   branch TEXT,                            -- feature/auth (optional, git context)
-  event_type TEXT NOT NULL,               -- heartbeat/claim/complete/etc
+  event_type TEXT NOT NULL,               -- decision/claim/complete/etc
   content TEXT,                           -- event-specific content
   metadata TEXT,                          -- JSON blob
 
@@ -100,7 +100,6 @@ CREATE TABLE IF NOT EXISTS events (
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
 CREATE INDEX IF NOT EXISTS idx_agents_plan ON agents(current_plan_id);
-CREATE INDEX IF NOT EXISTS idx_agents_heartbeat ON agents(last_heartbeat);
 CREATE INDEX IF NOT EXISTS idx_agents_worktree ON agents(worktree_id);
 
 CREATE INDEX IF NOT EXISTS idx_worktrees_path ON worktrees(path);

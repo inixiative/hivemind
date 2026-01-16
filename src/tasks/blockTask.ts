@@ -1,10 +1,10 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Mark a task as blocked
  */
 export function blockTask(
-  db: Database.Database,
+  db: Database,
   taskId: string,
   reason?: string
 ): boolean {

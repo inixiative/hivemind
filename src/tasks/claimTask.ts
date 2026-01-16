@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { now } from '../datetime/now';
 import type { Task } from './types';
 
@@ -7,7 +7,7 @@ import type { Task } from './types';
  * Returns the task if successful, null if already claimed or not found
  */
 export function claimTask(
-  db: Database.Database,
+  db: Database,
   taskId: string,
   agentId: string
 ): Task | null {

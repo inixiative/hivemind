@@ -28,11 +28,11 @@ export type Task = {
  * Input for creating a task
  */
 export type CreateTaskInput = {
-  planId: string;
+  plan_id: string;
   title: string;
   description?: string;
   branch?: string;
-  worktreeId?: string;
-  parentTaskId?: string;
+  worktree_id?: string;
+  parent_task_id?: string;
   label?: string;
 };

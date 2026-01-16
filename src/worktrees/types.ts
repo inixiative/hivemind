@@ -12,7 +12,7 @@ export type WorktreeRecord = {
   label: string | null;
   path: string;
   branch: string | null;
-  commit: string | null;
+  commit_hash: string | null;
   is_main: number;
   status: WorktreeStatus;
   created_at: string;
@@ -25,7 +25,7 @@ export type WorktreeRecord = {
 export type RegisterWorktreeInput = {
   path: string;
   branch?: string;
-  commit?: string;
-  isMain?: boolean;
+  commit_hash?: string;
+  is_main?: boolean;
   label?: string;
 };

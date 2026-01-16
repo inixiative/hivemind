@@ -13,5 +13,8 @@ export { getAllWorktrees } from './getAllWorktrees';
 export { updateWorktreeSeen } from './updateWorktreeSeen';
 export { updateWorktreeCommit } from './updateWorktreeCommit';
 
+// Removal
+export { removeWorktree } from './removeWorktree';
+
 // Sync
 export { syncWorktreesFromGit } from './syncWorktreesFromGit';

@@ -1,11 +1,11 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import type { WorktreeRecord } from './types';
 
 /**
  * Get a worktree by its filesystem path
  */
 export function getWorktreeByPath(
-  db: Database.Database,
+  db: Database,
   path: string
 ): WorktreeRecord | null {
   const stmt = db.prepare('SELECT * FROM worktrees WHERE path = ?');

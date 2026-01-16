@@ -37,6 +37,7 @@ export type RegisterInput = {
   project: string;
   label?: string;
   sessionId?: string;
+  pid?: number;
   contextSummary?: string;
 };
 
@@ -68,15 +69,16 @@ export function executeRegister(input: RegisterInput): RegisterResult {
   // Register the agent
   const agent = registerAgent(db, {
     label: input.label,
-    sessionId: input.sessionId,
-    worktreeId,
-    contextSummary: input.contextSummary,
+    pid: input.pid,
+    session_id: input.sessionId,
+    worktree_id: worktreeId,
+    context_summary: input.contextSummary,
   });
 
   // Emit registration event
   emit(db, {
-    agentId: agent.id,
-    worktreeId,
+    agent_id: agent.id,
+    worktree_id: worktreeId,
     branch,
     type: 'agent:register',
     content: input.contextSummary,

@@ -10,16 +10,22 @@ import {
   executeSetup,
   registerTool,
   executeRegister,
-  heartbeatTool,
-  executeHeartbeat,
   emitEventTool,
   executeEmitEvent,
   queryTool,
   executeQuery,
   statusTool,
   executeStatus,
-  syncTodosTool,
-  executeSyncTodos,
+  resetTool,
+  executeReset,
+  claimTaskTool,
+  executeClaimTask,
+  startTaskTool,
+  executeStartTask,
+  completeTaskTool,
+  executeCompleteTask,
+  eventsTool,
+  executeEvents,
 } from './tools/index';
 
 const server = new Server(
@@ -40,11 +46,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       setupTool,
       registerTool,
-      heartbeatTool,
+      statusTool,
+      eventsTool,
       emitEventTool,
       queryTool,
-      statusTool,
-      syncTodosTool,
+      claimTaskTool,
+      startTaskTool,
+      completeTaskTool,
+      resetTool,
     ],
   };
 });
@@ -63,9 +72,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'hivemind_register':
         result = executeRegister(args as Parameters<typeof executeRegister>[0]);
         break;
-      case 'hivemind_heartbeat':
-        result = executeHeartbeat(args as Parameters<typeof executeHeartbeat>[0]);
-        break;
       case 'hivemind_emit':
         result = executeEmitEvent(args as Parameters<typeof executeEmitEvent>[0]);
         break;
@@ -75,8 +81,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'hivemind_status':
         result = executeStatus(args as Parameters<typeof executeStatus>[0]);
         break;
-      case 'hivemind_sync_todos':
-        result = executeSyncTodos(args as Parameters<typeof executeSyncTodos>[0]);
+      case 'hivemind_reset':
+        result = executeReset(args as Parameters<typeof executeReset>[0]);
+        break;
+      case 'hivemind_claim_task':
+        result = executeClaimTask(args as Parameters<typeof executeClaimTask>[0]);
+        break;
+      case 'hivemind_start_task':
+        result = executeStartTask(args as Parameters<typeof executeStartTask>[0]);
+        break;
+      case 'hivemind_complete_task':
+        result = executeCompleteTask(args as Parameters<typeof executeCompleteTask>[0]);
+        break;
+      case 'hivemind_events':
+        result = executeEvents(args as Parameters<typeof executeEvents>[0]);
         break;
       default:
         throw new Error(`Unknown tool: ${name}`);

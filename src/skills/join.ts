@@ -3,11 +3,14 @@
  *
  * Combines setup + register into a single convenient command.
  * Automatically detects git repo, syncs worktrees, and registers agent.
+ * Also ensures the coordinator singleton is running.
  */
 
 import { executeSetup } from '../mcp/tools/setup';
 import { executeRegister } from '../mcp/tools/register';
 import { getGitInfo } from '../git/getGitInfo';
+import { ensureCoordinator } from '../coordinator/spawn';
+import { getProjectPaths } from '../db/getProjectPaths';
 
 export const joinSkill = {
   name: 'hm:join',
@@ -33,16 +36,32 @@ export const joinSkill = {
 After joining, you can:
 - Use hivemind_emit to share notes, decisions, questions
 - Use hivemind_query to see what other agents are doing
-- Use hivemind_heartbeat periodically to stay alive
+- Use TodoWrite normally - your todos auto-sync to hivemind plans
+
+Your agent lifecycle is tracked by PID - no heartbeats needed.
 `,
 };
 
 export type JoinInput = {
   label?: string;
   context?: string;
+  sessionId?: string;
+  pid?: number;
 };
 
-export function executeJoin(input: JoinInput = {}) {
+export type JoinResult =
+  | { needsInput: true; message: string }
+  | {
+      needsInput?: false;
+      agentId: string;
+      project: string;
+      worktreeId?: string;
+      branch?: string;
+      message: string;
+      setupMessage?: string;
+    };
+
+export function executeJoin(input: JoinInput = {}): JoinResult {
   const gitInfo = getGitInfo();
 
   if (!gitInfo.isRepo || !gitInfo.repoName) {
@@ -55,14 +74,26 @@ export function executeJoin(input: JoinInput = {}) {
   // Setup
   const setupResult = executeSetup({ project: gitInfo.repoName, useGit: true });
   if (setupResult.needsInput) {
-    return setupResult;
+    return {
+      needsInput: true,
+      message: setupResult.message ?? 'Setup requires input',
+    };
   }
 
   // Register
   const registerResult = executeRegister({
     project: setupResult.project!,
     label: input.label,
+    sessionId: input.sessionId,
+    pid: input.pid,
     contextSummary: input.context,
+  });
+
+  // Ensure coordinator singleton is running (upsert)
+  const paths = getProjectPaths(setupResult.project!);
+  ensureCoordinator({
+    project: setupResult.project!,
+    dataDir: paths.projectDir,
   });
 
   return {

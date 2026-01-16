@@ -1,9 +1,9 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Get next subtask sequence number for a parent task
  */
-export function nextSubtaskSeq(db: Database.Database, parentTaskId: string): number {
+export function nextSubtaskSeq(db: Database, parentTaskId: string): number {
   const stmt = db.prepare(`
     SELECT COUNT(*) as count
     FROM tasks

@@ -5,21 +5,27 @@ Multi-agent coordination for Claude Code. Shared event log, plans, and tasks acr
 ## Quick Start
 
 ```bash
-bun install
-bun run build
+./setup.sh
 ```
 
-Add to Claude Code MCP config:
-```json
-{
-  "mcpServers": {
-    "hivemind": {
-      "command": "bun",
-      "args": ["run", "/path/to/hivemind/src/mcp/server.ts"]
-    }
-  }
-}
+That's it. Restart Claude Code and hivemind is active.
+
+On startup you'll see:
 ```
+hivemind: agt_7a3f2b joined myproject (main)
+  session: abc123-def456
+  active: agt_c4d5e6_alice
+```
+
+## How It Works
+
+Agents are tracked by **process ID (PID)**, not heartbeats:
+- SessionStart hook registers agent with Claude's PID
+- Coordinator monitors PIDs every 30 seconds
+- When Claude exits, coordinator detects dead PID and marks agent dead
+- No polling or heartbeats required
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
 ## Tools
 
@@ -27,10 +33,10 @@ Add to Claude Code MCP config:
 |------|-------------|
 | `hivemind_setup` | Initialize project |
 | `hivemind_register` | Register this agent |
-| `hivemind_heartbeat` | Send heartbeat |
 | `hivemind_emit` | Emit event to log |
 | `hivemind_query` | Query events |
 | `hivemind_status` | Get status |
+| `hivemind_reset` | Reset database (for schema changes) |
 
 ## ID Format
 
@@ -45,7 +51,7 @@ Add to Claude Code MCP config:
 ## Event Types
 
 ```
-agent:register/heartbeat/unregister
+agent:register/unregister
 plan:create/join/complete
 task:create/claim/start/complete/block
 decision, question, answer, note
@@ -53,7 +59,7 @@ decision, question, answer, note
 
 ## Database
 
-Stored at `~/.hivemind/claude_hivemind_<project>/db.sqlite`
+Stored at `~/.hivemind/claude_hivemind_{project}/hivemind.db`
 
 Tables: agents, plans, tasks, events, worktrees
 

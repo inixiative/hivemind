@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { now } from '../datetime/now';
 import type { Task } from './types';
 
@@ -6,7 +6,7 @@ import type { Task } from './types';
  * Mark a task as complete with an outcome
  */
 export function completeTask(
-  db: Database.Database,
+  db: Database,
   taskId: string,
   outcome?: string
 ): Task | null {

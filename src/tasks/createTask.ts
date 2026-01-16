@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { makeTaskId } from '../ids/makeTaskId';
 import { parseId } from '../ids/parseId';
 import { getPlanHexFromTaskId } from '../ids/getPlanHexFromTaskId';
@@ -8,13 +8,13 @@ import type { Task, CreateTaskInput } from './types';
 /**
  * Create a new task in a plan
  */
-export function createTask(db: Database.Database, input: CreateTaskInput): Task {
+export function createTask(db: Database, input: CreateTaskInput): Task {
   // Get plan hex from plan ID
-  const planParsed = parseId(input.planId);
-  const seq = nextTaskSeq(db, input.planId);
-  const seqStr = seq.toString().padStart(3, '0');
+  const planParsed = parseId(input.plan_id);
+  const seq = nextTaskSeq(db, input.plan_id);
+  const seqStr = String(seq).padStart(3, '0');
 
-  const id = makeTaskId(planParsed.hex, seqStr, input.label);
+  const id = makeTaskId(planParsed.hex, seq, input.label);
   const parsed = parseId(id);
 
   const stmt = db.prepare(`
@@ -27,12 +27,12 @@ export function createTask(db: Database.Database, input: CreateTaskInput): Task 
     planParsed.hex,
     seqStr,
     parsed.label ?? null,
-    input.planId,
+    input.plan_id,
     input.title,
     input.description ?? null,
     input.branch ?? null,
-    input.worktreeId ?? null,
-    input.parentTaskId ?? null
+    input.worktree_id ?? null,
+    input.parent_task_id ?? null
   );
 
   return {
@@ -40,16 +40,16 @@ export function createTask(db: Database.Database, input: CreateTaskInput): Task 
     plan_hex: planParsed.hex,
     seq: seqStr,
     label: parsed.label ?? null,
-    plan_id: input.planId,
+    plan_id: input.plan_id,
     title: input.title,
     description: input.description ?? null,
     status: 'pending',
     branch: input.branch ?? null,
-    worktree_id: input.worktreeId ?? null,
+    worktree_id: input.worktree_id ?? null,
     claimed_by: null,
     claimed_at: null,
     completed_at: null,
     outcome: null,
-    parent_task_id: input.parentTaskId ?? null,
+    parent_task_id: input.parent_task_id ?? null,
   };
 }

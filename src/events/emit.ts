@@ -1,6 +1,5 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { makeEventId } from '../ids/makeEventId';
-import { parseId } from '../ids/parseId';
 import { now } from '../datetime/now';
 import { nextEventSeq } from '../db/nextEventSeq';
 import type { EventInput, Event } from './types';
@@ -8,10 +7,9 @@ import type { EventInput, Event } from './types';
 /**
  * Emit an event to the hivemind log
  */
-export function emit(db: Database.Database, input: EventInput): Event {
+export function emit(db: Database, input: EventInput): Event {
   const seq = nextEventSeq(db);
-  const id = makeEventId(seq);
-  const parsed = parseId(id);
+  const { id, hex } = makeEventId(seq);
   const timestamp = now();
 
   const stmt = db.prepare(`
@@ -19,15 +17,17 @@ export function emit(db: Database.Database, input: EventInput): Event {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
+  const agentId = input.agent_id ?? 'system';
+
   stmt.run(
     id,
-    parsed.hex,
+    hex,
     seq,
     timestamp,
-    input.agentId,
-    input.planId ?? null,
-    input.taskId ?? null,
-    input.worktreeId ?? null,
+    agentId,
+    input.plan_id ?? null,
+    input.task_id ?? null,
+    input.worktree_id ?? null,
     input.branch ?? null,
     input.type,
     input.content ?? null,
@@ -36,13 +36,13 @@ export function emit(db: Database.Database, input: EventInput): Event {
 
   return {
     id,
-    hex: parsed.hex,
+    hex,
     seq,
     timestamp,
-    agent_id: input.agentId,
-    plan_id: input.planId ?? null,
-    task_id: input.taskId ?? null,
-    worktree_id: input.worktreeId ?? null,
+    agent_id: agentId,
+    plan_id: input.plan_id ?? null,
+    task_id: input.task_id ?? null,
+    worktree_id: input.worktree_id ?? null,
     branch: input.branch ?? null,
     event_type: input.type,
     content: input.content ?? null,

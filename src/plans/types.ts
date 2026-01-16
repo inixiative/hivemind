@@ -15,6 +15,7 @@ export type Plan = {
   status: PlanStatus;
   branch: string | null;
   worktree_id: string | null;
+  claude_session_id: string | null;
   created_at: string;
   created_by: string | null;
 };
@@ -26,7 +27,8 @@ export type CreatePlanInput = {
   title: string;
   description?: string;
   branch?: string;
-  worktreeId?: string;
-  createdBy?: string;
+  worktree_id?: string;
+  claude_session_id?: string;
+  created_by?: string;
   label?: string;
 };

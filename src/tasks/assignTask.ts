@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type { Database } from 'bun:sqlite';
 import { now } from '../datetime/now';
 import type { Task } from './types';
 
@@ -7,7 +7,7 @@ import type { Task } from './types';
  * Use this when coordinating work - e.g., spawning a new agent for a task
  */
 export function assignTask(
-  db: Database.Database,
+  db: Database,
   taskId: string,
   agentId: string
 ): Task | null {

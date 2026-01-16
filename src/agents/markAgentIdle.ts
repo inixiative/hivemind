@@ -1,16 +1,15 @@
-import type Database from 'better-sqlite3';
-import { now } from '../datetime/now';
+import type { Database } from 'bun:sqlite';
 
 /**
  * Mark an agent as idle (alive but not actively working)
  */
-export function markAgentIdle(db: Database.Database, agentId: string): boolean {
+export function markAgentIdle(db: Database, agentId: string): boolean {
   const stmt = db.prepare(`
     UPDATE agents
-    SET status = 'idle', last_heartbeat = ?
+    SET status = 'idle'
     WHERE id = ?
   `);
 
-  const result = stmt.run(now(), agentId);
+  const result = stmt.run(agentId);
   return result.changes > 0;
 }
