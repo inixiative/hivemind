@@ -10,12 +10,14 @@ Multi-agent coordination for Claude Code. Shared event log, plans, and tasks acr
 
 That's it. Restart Claude Code and hivemind is active.
 
-On startup you'll see:
+On startup, Claude receives context about the hivemind state:
 ```
 hivemind: agt_7a3f2b joined myproject (main)
   session: abc123-def456
   active: agt_c4d5e6_alice
 ```
+
+This info goes into Claude's system context (not printed to terminal). Claude knows its agent ID and can see other active agents.
 
 ## How It Works
 
@@ -31,11 +33,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
 | Tool | Description |
 |------|-------------|
-| `hivemind_setup` | Initialize project |
-| `hivemind_register` | Register this agent |
+| `hivemind_status` | Get status (agents, plans with task counts, events) |
 | `hivemind_emit` | Emit event to log |
 | `hivemind_query` | Query events |
-| `hivemind_status` | Get status |
+| `hivemind_claim_task` | Claim a task to work on |
+| `hivemind_start_task` | Mark task in progress |
+| `hivemind_complete_task` | Mark task done |
+| `hivemind_setup` | Initialize project |
+| `hivemind_register` | Register this agent |
 | `hivemind_reset` | Reset database (for schema changes) |
 
 ## ID Format
