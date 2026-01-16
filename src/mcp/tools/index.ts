@@ -32,5 +32,6 @@ export type { ClaimTaskInput, StartTaskInput, CompleteTaskInput } from './tasks'
 export { eventsTool, executeEvents } from './events';
 export type { EventsInput, EventsResult } from './events';
 
-// Note: Plan/task creation happens via file watcher on ~/.claude/plans/
-// Agents claim/complete tasks via MCP tools above
+// Worktree management
+export { worktreeCleanupTool, executeWorktreeCleanup } from './worktreeCleanup';
+export type { WorktreeCleanupInput, WorktreeCleanupResult } from './worktreeCleanup';

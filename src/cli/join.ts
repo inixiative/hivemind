@@ -2,7 +2,7 @@
  * hivemind join - Join the hivemind as an agent
  */
 
-import { executeJoin } from '../skills/join';
+import { executeRegister } from '../mcp/tools/register';
 import { executeStatus } from '../mcp/tools/status';
 import { getGitInfo } from '../git/getGitInfo';
 
@@ -22,15 +22,11 @@ export async function joinCommand(options: JoinOptions) {
   console.log(`hivemind join: ${gitInfo.repoName}\n`);
 
   try {
-    const result = executeJoin({
+    const result = executeRegister({
+      project: gitInfo.repoName,
       label: options.label,
-      context: options.context,
+      contextSummary: options.context,
     });
-
-    if (result.needsInput) {
-      console.log(result.message);
-      return;
-    }
 
     console.log(`Agent: ${result.agentId}`);
     if (result.branch) {

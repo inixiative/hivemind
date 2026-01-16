@@ -7,6 +7,7 @@
  *   bun run src/cli.ts init              # Register current project
  *   bun run src/cli.ts status            # Show project status
  *   bun run src/cli.ts join              # Join as an agent
+ *   bun run src/cli.ts watch             # Live tail of events
  */
 
 import { Command } from 'commander';
@@ -14,6 +15,7 @@ import { installCommand } from './cli/install';
 import { initCommand } from './cli/init';
 import { statusCommand } from './cli/status';
 import { joinCommand } from './cli/join';
+import { watchCommand } from './cli/watch';
 
 const program = new Command();
 
@@ -46,5 +48,11 @@ program
   .option('-l, --label <label>', 'Agent label')
   .option('-c, --context <summary>', 'Context summary')
   .action(joinCommand);
+
+program
+  .command('watch')
+  .description('Live tail of hivemind events')
+  .option('-p, --project <name>', 'Project name')
+  .action(watchCommand);
 
 program.parse();

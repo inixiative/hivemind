@@ -12,7 +12,7 @@
  * Claude Code passes JSON via stdin with session_id, transcript_path, cwd, etc.
  */
 
-import { executeJoin } from '../skills/join';
+import { executeRegister } from '../mcp/tools/register';
 import { executeStatus } from '../mcp/tools/status';
 import { getGitInfo } from '../git/getGitInfo';
 
@@ -61,15 +61,12 @@ export function runSessionStartHook(input?: HookInput) {
     // process.ppid is Claude's process (or close to it in the process tree)
     const pid = process.ppid;
 
-    const result = executeJoin({
+    const result = executeRegister({
+      project: gitInfo.repoName,
       label,
       sessionId,
       pid,
     });
-
-    if (result.needsInput) {
-      return;
-    }
 
     // Get status to show other agents
     const status = executeStatus({ project: gitInfo.repoName });

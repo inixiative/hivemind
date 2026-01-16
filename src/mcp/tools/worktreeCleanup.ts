@@ -1,31 +1,34 @@
 /**
- * /hm:worktree-cleanup - Clean up stale worktrees
- *
- * Removes worktrees from the database that no longer exist on disk.
+ * hivemind_worktree_cleanup - Clean up stale worktrees
  */
 
 import { existsSync } from 'fs';
-import { getConnection } from '../db/getConnection';
-import { getAllWorktrees } from '../worktrees/getAllWorktrees';
-import { removeWorktree } from '../worktrees/removeWorktree';
-import { emit } from '../events/emit';
-import { getGitInfo } from '../git/getGitInfo';
+import { getConnection } from '../../db/getConnection';
+import { getAllWorktrees } from '../../worktrees/getAllWorktrees';
+import { removeWorktree } from '../../worktrees/removeWorktree';
+import { emit } from '../../events/emit';
 
-export const worktreeCleanupSkill = {
-  name: 'hm:worktree-cleanup',
-  description: 'Clean up stale worktrees from hivemind',
-  prompt: `Clean up stale worktrees from the hivemind database.
-
-This will:
-- Check all registered worktrees
-- Remove any whose paths no longer exist on disk
-- Emit worktree:stale events for coordination
-
-Use --dry-run to preview without deleting.
-`,
+export const worktreeCleanupTool = {
+  name: 'hivemind_worktree_cleanup',
+  description: 'Clean up stale worktrees from hivemind database',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      project: {
+        type: 'string',
+        description: 'Project name',
+      },
+      dryRun: {
+        type: 'boolean',
+        description: 'Preview without deleting',
+      },
+    },
+    required: ['project'],
+  },
 };
 
 export type WorktreeCleanupInput = {
+  project: string;
   dryRun?: boolean;
 };
 
@@ -37,20 +40,9 @@ export type WorktreeCleanupResult = {
 };
 
 export function executeWorktreeCleanup(
-  input: WorktreeCleanupInput = {}
+  input: WorktreeCleanupInput
 ): WorktreeCleanupResult {
-  const gitInfo = getGitInfo();
-
-  if (!gitInfo.isRepo || !gitInfo.repoName) {
-    return {
-      checked: 0,
-      removed: [],
-      kept: [],
-      dryRun: input.dryRun ?? false,
-    };
-  }
-
-  const db = getConnection(gitInfo.repoName);
+  const db = getConnection(input.project);
   const worktrees = getAllWorktrees(db);
 
   const removed: string[] = [];
@@ -63,7 +55,6 @@ export function executeWorktreeCleanup(
       if (!input.dryRun) {
         removeWorktree(db, wt.id);
 
-        // Emit worktree:stale event
         emit(db, {
           type: 'worktree:stale',
           worktree_id: wt.id,

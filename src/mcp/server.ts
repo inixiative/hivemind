@@ -26,6 +26,8 @@ import {
   executeCompleteTask,
   eventsTool,
   executeEvents,
+  worktreeCleanupTool,
+  executeWorktreeCleanup,
 } from './tools/index';
 
 const server = new Server(
@@ -53,6 +55,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       claimTaskTool,
       startTaskTool,
       completeTaskTool,
+      worktreeCleanupTool,
       resetTool,
     ],
   };
@@ -95,6 +98,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'hivemind_events':
         result = executeEvents(args as Parameters<typeof executeEvents>[0]);
+        break;
+      case 'hivemind_worktree_cleanup':
+        result = executeWorktreeCleanup(args as Parameters<typeof executeWorktreeCleanup>[0]);
         break;
       default:
         throw new Error(`Unknown tool: ${name}`);

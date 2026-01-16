@@ -29,6 +29,8 @@ const AUTO_APPROVED_TOOLS = [
   'mcp__hivemind__hivemind_claim_task',
   'mcp__hivemind__hivemind_start_task',
   'mcp__hivemind__hivemind_complete_task',
+  // Maintenance
+  'mcp__hivemind__hivemind_worktree_cleanup',
 ];
 
 // NOT auto-approved (require human oversight):

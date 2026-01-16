@@ -31,17 +31,31 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
-| `hivemind_status` | Get status (agents, plans with task counts, events) |
-| `hivemind_emit` | Emit event to log |
-| `hivemind_query` | Query events |
-| `hivemind_claim_task` | Claim a task to work on |
-| `hivemind_start_task` | Mark task in progress |
-| `hivemind_complete_task` | Mark task done |
-| `hivemind_setup` | Initialize project |
-| `hivemind_register` | Register this agent |
-| `hivemind_reset` | Reset database (for schema changes) |
+| Tool | Description | Auto |
+|------|-------------|------|
+| `hivemind_status` | Get status (agents, plans, events) | ✓ |
+| `hivemind_events` | Get recent events | ✓ |
+| `hivemind_query` | Query events with filters | ✓ |
+| `hivemind_claim_task` | Claim a task | ✓ |
+| `hivemind_start_task` | Mark task in progress | ✓ |
+| `hivemind_complete_task` | Mark task done | ✓ |
+| `hivemind_worktree_cleanup` | Clean up stale worktrees | ✓ |
+| `hivemind_setup` | Initialize project | ✓ |
+| `hivemind_register` | Register this agent | ✓ |
+| `hivemind_emit` | Emit event to log | ✗ |
+| `hivemind_reset` | Reset database | ✗ |
+
+Tools marked ✓ are auto-approved after `./setup.sh`. Tools marked ✗ require confirmation.
+
+## CLI
+
+```bash
+hivemind install    # One-time global setup
+hivemind init       # Register current project
+hivemind status     # Show project status
+hivemind watch      # Live tail of events
+hivemind join       # Join as an agent
+```
 
 ## ID Format
 
