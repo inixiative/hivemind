@@ -1,0 +1,9 @@
+{
+  "name": "hivemind",
+  "version": "0.1.0",
+  "description": "Multi-agent coordination for Claude Code - shared event log, plans, and tasks across sessions",
+  "author": "Aron Greenspan",
+  "repository": "https://github.com/inixiative/hivemind",
+  "license": "MIT",
+  "keywords": ["multi-agent", "coordination", "collaboration", "tasks", "plans"]
+}
