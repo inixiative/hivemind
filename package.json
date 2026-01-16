@@ -1,12 +1,42 @@
 {
-  "name": "hivemind",
+  "name": "@inixiative/hivemind",
   "version": "0.1.0",
-  "description": "Multi-agent coordination system for Claude Code",
+  "description": "Multi-agent coordination system for Claude Code - shared event log, plans, and tasks across multiple Claude sessions",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "hivemind": "./dist/cli.js",
     "hivemind-mcp": "./dist/mcp/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inixiative/hivemind.git"
+  },
+  "homepage": "https://github.com/inixiative/hivemind#readme",
+  "bugs": {
+    "url": "https://github.com/inixiative/hivemind/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Aron Greenspan",
+    "url": "https://github.com/inixiative"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "claude-code",
+    "multi-agent",
+    "coordination",
+    "ai-agents"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "tsc",

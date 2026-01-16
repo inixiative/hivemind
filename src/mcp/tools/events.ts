@@ -10,6 +10,12 @@ import type { Event } from '../../events/types';
 export const eventsTool = {
   name: 'hivemind_events',
   description: 'Get recent events from the hivemind. Use to see what other agents are doing.',
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

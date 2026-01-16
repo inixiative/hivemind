@@ -18,6 +18,12 @@ import { emit } from '../../events/emit';
 export const claimTaskTool = {
   name: 'hivemind_claim_task',
   description: 'Claim a task to work on. Other agents will see you own this task.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -77,6 +83,12 @@ export function executeClaimTask(input: ClaimTaskInput): {
 export const startTaskTool = {
   name: 'hivemind_start_task',
   description: 'Mark a task as in progress. Call after claiming when you begin work.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -129,6 +141,12 @@ export function executeStartTask(input: StartTaskInput): {
 export const completeTaskTool = {
   name: 'hivemind_complete_task',
   description: 'Mark a task as done.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

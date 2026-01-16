@@ -9,6 +9,12 @@ import { getBranch } from '../../git/getBranch';
 export const registerTool = {
   name: 'hivemind_register',
   description: 'Register this Claude agent with the hivemind. Call this at the start of a session.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

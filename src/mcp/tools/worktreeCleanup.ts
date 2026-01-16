@@ -11,6 +11,12 @@ import { emit } from '../../events/emit';
 export const worktreeCleanupTool = {
   name: 'hivemind_worktree_cleanup',
   description: 'Clean up stale worktrees from hivemind database',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object' as const,
     properties: {

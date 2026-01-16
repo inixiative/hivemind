@@ -11,6 +11,12 @@ import type { Plan } from '../../plans/types';
 export const statusTool = {
   name: 'hivemind_status',
   description: 'Get current hivemind status: active agents, worktrees, recent events.',
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

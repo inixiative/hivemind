@@ -11,6 +11,12 @@ export const emitEventTool = {
   description:
     'Emit an event to the hivemind log for other agents to see. ' +
     'Can use either agentId directly or sessionId to look up the agent.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

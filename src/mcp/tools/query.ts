@@ -9,6 +9,12 @@ import type { Event } from '../../events/types';
 export const queryTool = {
   name: 'hivemind_query',
   description: 'Query events from the hivemind log.',
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

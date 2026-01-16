@@ -7,6 +7,12 @@ import { getGitInfo } from '../../git/getGitInfo';
 export const resetTool = {
   name: 'hivemind_reset',
   description: 'Reset the hivemind database. Deletes all data and recreates with fresh schema. Use for schema migrations.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {

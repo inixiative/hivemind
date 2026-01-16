@@ -8,6 +8,12 @@ import { getGitInfo } from '../../git/getGitInfo';
 export const setupTool = {
   name: 'hivemind_setup',
   description: 'Initialize hivemind for a project. Detects git repo info automatically.',
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: {
     type: 'object',
     properties: {
