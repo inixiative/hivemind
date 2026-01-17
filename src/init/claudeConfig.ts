@@ -15,19 +15,19 @@ import { join } from 'path';
 /**
  * Default events instructions (used if project doesn't define custom ones)
  */
-const DEFAULT_EVENTS_SECTION = `## Hivemind Events
+const DEFAULT_EVENTS_SECTION = `## Events
 
-Emit concise events to coordinate. **Under 80 chars.** Map, not territory.
+Keep events **under 80 chars**. Map, not territory.
 
 \`\`\`
 hivemind_emit type=decision content="Redis for cache, Postgres for persistence"
 hivemind_emit type=context content="API rate limit: 100/min per key"
-hivemind_emit type=note content="003 done, starting 004"
+hivemind_emit type=note content="finished auth refactor, starting tests"
 \`\`\`
 
-**Emit for:** architectural decisions, discoveries others need, blockers, questions.
+**Emit for:** architectural decisions, discoveries others need, blockers.
 
-**Skip:** routine progress, obvious steps, anything verbose.`;
+**Skip:** routine progress, obvious steps, verbose explanations.`;
 
 /**
  * Extract a markdown section by heading from content
@@ -69,28 +69,31 @@ export function buildHivemindClaudeMd(customEventsSection?: string): string {
 
 You are part of a **hivemind** - a coordinated group of Claude agents working together.
 
-## Automatic Behaviors
-
-**Your todos are automatically synced to hivemind.** When you use TodoWrite, the hivemind watcher detects changes and syncs them to a shared plan. Other agents can see your progress in real-time.
+## Lifecycle
 
 Your lifecycle is tracked by PID - no heartbeats needed. When you exit, hivemind automatically marks you as inactive.
 
-## MCP Tools
+## MCP Tools - USE THESE
 
-- \`hivemind_status\` - View active agents, plans, and recent activity
-- \`hivemind_query\` - See what other agents are doing
-- \`hivemind_emit\` - Share notes, decisions, questions with other agents
+**\`hivemind_status\`** - CALL THIS FIRST when you start a session. Shows active agents, what they're working on, and recent events. Prevents duplicate work.
+
+**\`hivemind_emit\`** - Share important context with other agents. Use for:
+- \`type=decision\` - Architectural choices others should know
+- \`type=context\` - Discovered constraints (rate limits, gotchas)
+- \`type=question\` - When you're blocked and need input
+
+**\`hivemind_query\`** - Ask questions about the hivemind state.
 
 ${eventsSection}
 
 ## Coordination Protocol
 
-1. **Before starting work**: Check \`hivemind_status\` to see what others are doing
-2. **When making decisions**: Use \`hivemind_emit\` with type "decision" to share
-3. **When blocked**: Use \`hivemind_emit\` with type "question" to ask for help
-4. **Just work**: Your todos sync automatically - focus on the task!
-`
-;}
+1. **Session start**: Run \`hivemind_status\` to see who's online and what's happening
+2. **Architectural decisions**: Emit with \`type=decision\` so others know
+3. **Blockers**: Emit with \`type=question\` - another agent may have context
+4. **Focus on work**: The system tracks your lifecycle automatically
+`;
+}
 
 /**
  * Settings.json hooks for auto-registration
