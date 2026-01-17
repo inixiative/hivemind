@@ -9,8 +9,8 @@ import type { EventType } from '../../events/types';
 export const emitEventTool = {
   name: 'hivemind_emit',
   description:
-    'Emit an event to the hivemind log for other agents to see. ' +
-    'Can use either agentId directly or sessionId to look up the agent.',
+    'Share context with other agents. Use type=decision for architectural choices, ' +
+    'type=context for discovered constraints, type=question when blocked. Keep under 80 chars.',
   annotations: {
     readOnlyHint: false,
     destructiveHint: false,

@@ -10,7 +10,7 @@ import type { Plan } from '../../plans/types';
 
 export const statusTool = {
   name: 'hivemind_status',
-  description: 'Get current hivemind status: active agents, worktrees, recent events.',
+  description: 'CALL THIS FIRST at session start. Shows active agents, what they are working on, and recent events. Prevents duplicate work.',
   annotations: {
     readOnlyHint: true,
     destructiveHint: false,
