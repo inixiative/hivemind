@@ -38,6 +38,20 @@ function parsePlanTitle(content: string): string | null {
 }
 
 /**
+ * Parse project from YAML frontmatter
+ * Looks for: ---\nproject: Name\n---
+ */
+function parseProjectFromPlan(content: string): string | null {
+  // Match YAML frontmatter block and extract project field
+  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!frontmatterMatch) return null;
+
+  const frontmatter = frontmatterMatch[1];
+  const projectMatch = frontmatter.match(/^project:\s*(.+?)\s*$/m);
+  return projectMatch ? projectMatch[1].trim() : null;
+}
+
+/**
  * Sync a single plan file to hivemind
  * Uses LLM to extract tasks, then reconciles with DB
  */
@@ -72,6 +86,13 @@ export async function syncPlanFile(
 
   // Read and parse
   const content = readFileSync(filePath, 'utf-8');
+
+  // Check if plan belongs to a different project
+  const planProject = parseProjectFromPlan(content);
+  if (planProject && planProject !== project) {
+    return { success: false, message: `Skipping (belongs to ${planProject})` };
+  }
+
   const title = parsePlanTitle(content) || basename(filename, '.md');
 
   const db = getConnection(project);

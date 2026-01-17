@@ -60,9 +60,9 @@ export function extractMarkdownSection(
 }
 
 /**
- * Build the CLAUDE.md content, optionally with custom events section
+ * Build the CLAUDE.md content with project name and optional custom events section
  */
-export function buildHivemindClaudeMd(customEventsSection?: string): string {
+export function buildHivemindClaudeMd(projectName: string, customEventsSection?: string): string {
   const eventsSection = customEventsSection || DEFAULT_EVENTS_SECTION;
 
   return `# Hivemind Agent Instructions
@@ -92,6 +92,18 @@ ${eventsSection}
 2. **Architectural decisions**: Emit with \`type=decision\` so others know
 3. **Blockers**: Emit with \`type=question\` - another agent may have context
 4. **Focus on work**: The system tracks your lifecycle automatically
+
+## Plan Mode
+
+When creating plan files in ~/.claude/plans/, **always start with frontmatter**:
+
+\`\`\`yaml
+---
+project: ${projectName}
+---
+\`\`\`
+
+This ensures plans are synced to the correct hivemind project database.
 `;
 }
 
@@ -120,7 +132,7 @@ export function getHivemindHooks(hivemindRoot: string) {
  */
 export function initClaudeConfig(
   projectRoot: string,
-  _project: string,
+  project: string,
   hivemindRoot: string
 ): { created: string[]; updated: string[] } {
   const claudeDir = join(projectRoot, '.claude');
@@ -166,8 +178,8 @@ export function initClaudeConfig(
     }
   }
 
-  // Build the hivemind instructions (with custom or default events section)
-  const hivemindClaudeMd = buildHivemindClaudeMd(customEventsSection);
+  // Build the hivemind instructions (with project name and custom or default events section)
+  const hivemindClaudeMd = buildHivemindClaudeMd(project, customEventsSection);
 
   // Create or update .claude/CLAUDE.md
   if (!existsSync(claudeMdPath)) {
