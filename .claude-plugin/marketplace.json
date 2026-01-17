@@ -1,0 +1,11 @@
+{
+  "name": "hivemind-marketplace",
+  "version": "1.0.0",
+  "description": "Marketplace for hivemind multi-agent coordination plugin",
+  "plugins": [
+    {
+      "name": "hivemind",
+      "path": "."
+    }
+  ]
+}

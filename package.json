@@ -1,6 +1,6 @@
 {
   "name": "@inixiative/hivemind",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Multi-agent coordination system for Claude Code - shared event log, plans, and tasks across multiple Claude sessions",
   "type": "module",
   "main": "dist/index.js",
@@ -39,9 +39,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/db/schema.sql dist/db/",
     "dev": "tsc --watch",
-    "test": "bun test",
+    "test": "bun test src/",
     "mcp": "bun run src/mcp/server.ts",
     "cli": "bun run src/cli.ts"
   },

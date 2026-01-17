@@ -44,10 +44,11 @@ describe('SQLite Database', () => {
     });
   });
 
-  describe('WAL mode', () => {
-    it('uses WAL journal mode', () => {
+  describe('journal mode', () => {
+    it('uses memory journal mode for in-memory test db', () => {
       const result = testDb.db.query('PRAGMA journal_mode').get() as { journal_mode: string };
-      expect(result.journal_mode).toBe('wal');
+      // In-memory databases use 'memory' journal mode
+      expect(result.journal_mode).toBe('memory');
     });
   });
 
