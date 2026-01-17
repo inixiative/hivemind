@@ -19,15 +19,22 @@ const DEFAULT_EVENTS_SECTION = `## Events
 
 Keep events **under 80 chars**. Map, not territory.
 
+**One event per accomplishment.** If you complete 3 tasks, emit 3 notes:
 \`\`\`
-hivemind_emit type=decision content="Redis for cache, Postgres for persistence"
-hivemind_emit type=context content="API rate limit: 100/min per key"
-hivemind_emit type=note content="finished auth refactor, starting tests"
+hivemind_emit type=note content="Added Redis caching layer"
+hivemind_emit type=note content="Updated API rate limiting to 100/min"
+hivemind_emit type=note content="Fixed auth token refresh bug"
 \`\`\`
 
-**Emit for:** architectural decisions, discoveries others need, blockers.
+Not one combined note. Other agents need granular visibility.
 
-**Skip:** routine progress, obvious steps, verbose explanations.`;
+**Event types:**
+- \`decision\` - Architectural choices others should know
+- \`context\` - Discovered constraints, gotchas
+- \`note\` - Task completions, progress updates
+- \`question\` - When blocked and need input
+
+**Skip:** routine progress on obvious steps, verbose explanations.`;
 
 /**
  * Extract a markdown section by heading from content
