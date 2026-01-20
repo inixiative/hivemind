@@ -4,10 +4,13 @@ import { buildAgent, buildTask } from '../test/factories';
 import { registerAgent } from './registerAgent';
 import { getAgent } from './getAgent';
 import { getActiveAgents } from './getActiveAgents';
+import { getAgentByPid } from './getAgentByPid';
+import { getAgentBySessionId } from './getAgentBySessionId';
 import { markAgentDead } from './markAgentDead';
 import { markAgentIdle } from './markAgentIdle';
 import { updateAgentContext } from './updateAgentContext';
 import { updateAgentTask } from './updateAgentTask';
+import { updateAgentSession } from './updateAgentSession';
 import { unregisterAgent } from './unregisterAgent';
 
 describe('Agents Module', () => {
@@ -219,6 +222,111 @@ describe('Agents Module', () => {
 
       const retrieved = getAgent(testDb.db, agent.id);
       expect(retrieved).toBeNull();
+    });
+  });
+
+  describe('getAgentByPid', () => {
+    it('finds active agent by PID', () => {
+      const { agent } = buildAgent(testDb.db, { pid: 12345 });
+
+      const found = getAgentByPid(testDb.db, 12345);
+
+      expect(found).toBeDefined();
+      expect(found!.id).toBe(agent.id);
+      expect(found!.pid).toBe(12345);
+    });
+
+    it('returns null when PID not found', () => {
+      buildAgent(testDb.db, { pid: 12345 });
+
+      const found = getAgentByPid(testDb.db, 99999);
+
+      expect(found).toBeNull();
+    });
+
+    it('only returns active agents', () => {
+      const { agent } = buildAgent(testDb.db, { pid: 12345 });
+      markAgentDead(testDb.db, agent.id);
+
+      const found = getAgentByPid(testDb.db, 12345);
+
+      expect(found).toBeNull();
+    });
+
+    it('returns most recent agent when multiple have same PID', () => {
+      buildAgent(testDb.db, { pid: 12345, label: 'old' });
+      const { agent: newer } = buildAgent(testDb.db, { pid: 12345, label: 'new' });
+
+      const found = getAgentByPid(testDb.db, 12345);
+
+      expect(found!.id).toBe(newer.id);
+    });
+  });
+
+  describe('getAgentBySessionId', () => {
+    it('finds agent by session ID', () => {
+      const { agent } = buildAgent(testDb.db, { session_id: 'session-abc-123' });
+
+      const found = getAgentBySessionId(testDb.db, 'session-abc-123');
+
+      expect(found).toBeDefined();
+      expect(found!.id).toBe(agent.id);
+    });
+
+    it('returns null when session not found', () => {
+      buildAgent(testDb.db, { session_id: 'session-abc-123' });
+
+      const found = getAgentBySessionId(testDb.db, 'different-session');
+
+      expect(found).toBeNull();
+    });
+  });
+
+  describe('updateAgentSession', () => {
+    it('updates session ID for existing agent', () => {
+      const { agent } = buildAgent(testDb.db, { session_id: 'old-session' });
+
+      updateAgentSession(testDb.db, agent.id, 'new-session');
+
+      const retrieved = getAgent(testDb.db, agent.id);
+      expect(retrieved!.session_id).toBe('new-session');
+    });
+
+    it('allows lookup by new session ID after update', () => {
+      const { agent } = buildAgent(testDb.db, { session_id: 'old-session' });
+
+      updateAgentSession(testDb.db, agent.id, 'new-session');
+
+      // Old session no longer works
+      expect(getAgentBySessionId(testDb.db, 'old-session')).toBeNull();
+
+      // New session works
+      const found = getAgentBySessionId(testDb.db, 'new-session');
+      expect(found).toBeDefined();
+      expect(found!.id).toBe(agent.id);
+    });
+  });
+
+  describe('compaction resilience', () => {
+    it('supports reconnecting agent with new session ID via PID', () => {
+      // Agent registers with original session
+      const { agent } = buildAgent(testDb.db, {
+        pid: 54321,
+        session_id: 'original-session',
+      });
+
+      // Simulate compaction: lookup by PID, update session
+      const existingAgent = getAgentByPid(testDb.db, 54321);
+      expect(existingAgent).toBeDefined();
+      expect(existingAgent!.id).toBe(agent.id);
+
+      // Update to new session ID
+      updateAgentSession(testDb.db, agent.id, 'compacted-session');
+
+      // Now agent can be found by new session
+      const found = getAgentBySessionId(testDb.db, 'compacted-session');
+      expect(found).toBeDefined();
+      expect(found!.id).toBe(agent.id);
     });
   });
 });

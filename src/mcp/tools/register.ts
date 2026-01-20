@@ -1,5 +1,7 @@
 import { getConnection } from '../../db/getConnection';
 import { registerAgent } from '../../agents/registerAgent';
+import { getAgentByPid } from '../../agents/getAgentByPid';
+import { updateAgentSession } from '../../agents/updateAgentSession';
 import { emit } from '../../events/emit';
 import { syncWorktreesFromGit } from '../../worktrees/syncWorktreesFromGit';
 import { getWorktreeByPath } from '../../worktrees/getWorktreeByPath';
@@ -72,27 +74,39 @@ export function executeRegister(input: RegisterInput): RegisterResult {
 
   const branch = getBranch() ?? undefined;
 
-  // Register the agent
-  const agent = registerAgent(db, {
-    label: input.label,
-    pid: input.pid,
-    session_id: input.sessionId,
-    worktree_id: worktreeId,
-    context_summary: input.contextSummary,
-  });
+  // Check if agent already exists with this PID (reconnecting after compaction)
+  let agent = input.pid ? getAgentByPid(db, input.pid) : null;
+  let isReconnect = false;
 
-  // Emit registration event
-  emit(db, {
-    agent_id: agent.id,
-    worktree_id: worktreeId,
-    branch,
-    type: 'agent:register',
-    content: input.contextSummary,
-    metadata: {
-      sessionId: input.sessionId,
+  if (agent && input.sessionId) {
+    // Update existing agent's session ID (compaction scenario)
+    updateAgentSession(db, agent.id, input.sessionId);
+    isReconnect = true;
+  } else {
+    // Register new agent
+    agent = registerAgent(db, {
       label: input.label,
-    },
-  });
+      pid: input.pid,
+      session_id: input.sessionId,
+      worktree_id: worktreeId,
+      context_summary: input.contextSummary,
+    });
+  }
+
+  // Emit registration event (only for new agents)
+  if (!isReconnect) {
+    emit(db, {
+      agent_id: agent.id,
+      worktree_id: worktreeId,
+      branch,
+      type: 'agent:register',
+      content: input.contextSummary,
+      metadata: {
+        sessionId: input.sessionId,
+        label: input.label,
+      },
+    });
+  }
 
   return {
     agentId: agent.id,
