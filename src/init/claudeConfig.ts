@@ -116,18 +116,39 @@ This ensures plans are synced to the correct hivemind project database.
 
 /**
  * Settings.json hooks for auto-registration
+ *
+ * SessionStart matchers:
+ * - startup: New session
+ * - resume: --resume, --continue, /resume
+ * - clear: /clear command
+ * - compact: Auto or manual compact (new session ID assigned)
+ *
+ * We register on all events to handle compaction gracefully.
+ * The hook checks PID to reuse existing agent when session ID changes.
  */
 export function getHivemindHooks(hivemindRoot: string) {
+  const sessionStartCommand = {
+    type: 'command',
+    command: `bun run ${hivemindRoot}/src/hooks/sessionStart.ts`,
+  };
+
   return {
     hooks: {
       SessionStart: [
+        // Handle new sessions
         {
-          hooks: [
-            {
-              type: 'command',
-              command: `bun run ${hivemindRoot}/src/hooks/sessionStart.ts`,
-            },
-          ],
+          matcher: 'startup',
+          hooks: [sessionStartCommand],
+        },
+        // Handle compaction (session ID changes, but PID stays same)
+        {
+          matcher: 'compact',
+          hooks: [sessionStartCommand],
+        },
+        // Handle resume scenarios
+        {
+          matcher: 'resume',
+          hooks: [sessionStartCommand],
         },
       ],
     },
