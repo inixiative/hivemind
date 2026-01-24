@@ -48,7 +48,8 @@ function readStdinSync(): string {
 }
 
 export function runSessionStartHook(input?: HookInput) {
-  const gitInfo = getGitInfo();
+  // Use cwd from hook input (Claude's actual working directory), not process.cwd()
+  const gitInfo = getGitInfo(input?.cwd);
 
   if (!gitInfo.isRepo || !gitInfo.repoName) {
     return;

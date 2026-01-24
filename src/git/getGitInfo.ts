@@ -11,10 +11,10 @@ export type GitInfo = {
 };
 
 /**
- * Get all git info for current directory
+ * Get all git info for a directory (defaults to process.cwd())
  */
-export function getGitInfo(): GitInfo {
-  if (!isGitRepo()) {
+export function getGitInfo(cwd?: string): GitInfo {
+  if (!isGitRepo(cwd)) {
     return {
       isRepo: false,
       repoName: null,
@@ -25,8 +25,8 @@ export function getGitInfo(): GitInfo {
 
   return {
     isRepo: true,
-    repoName: getRepoName(),
-    branch: getBranch(),
-    root: getRepoRoot(),
+    repoName: getRepoName(cwd),
+    branch: getBranch(cwd),
+    root: getRepoRoot(cwd),
   };
 }
