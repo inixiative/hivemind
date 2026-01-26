@@ -2,6 +2,7 @@ import { getConnection } from '../../db/getConnection';
 import { getProjectPaths } from '../../db/getProjectPaths';
 import { emit } from '../../events/emit';
 import { getAgentBySessionId } from '../../agents/getAgentBySessionId';
+import { getAgentByPid } from '../../agents/getAgentByPid';
 import { ensureCoordinator } from '../../coordinator/spawn';
 import { getBranch } from '../../git/getBranch';
 import type { EventType } from '../../events/types';
@@ -61,6 +62,7 @@ export type EmitEventInput = {
   content: string;
   planId?: string;
   taskId?: string;
+  cwd?: string;
 };
 
 export type EmitEventResult = {
@@ -78,10 +80,18 @@ export function executeEmitEvent(input: EmitEventInput): EmitEventResult {
   // Ensure coordinator is running
   ensureCoordinator({ project: input.project, dataDir: paths.projectDir });
 
-  // Resolve agent ID - either directly provided or looked up by session
+  // Resolve agent ID - try multiple methods:
+  // 1. Directly provided agentId
+  // 2. Look up by sessionId
+  // 3. Fallback to PID lookup (MCP server's parent is Claude)
   let agentId = input.agentId;
   if (!agentId && input.sessionId) {
     const agent = getAgentBySessionId(db, input.sessionId);
+    agentId = agent?.id;
+  }
+  if (!agentId) {
+    // Try PID fallback - process.ppid is Claude's process
+    const agent = getAgentByPid(db, process.ppid);
     agentId = agent?.id;
   }
 
@@ -96,7 +106,7 @@ export function executeEmitEvent(input: EmitEventInput): EmitEventResult {
     agent_id: agentId,
     plan_id: input.planId,
     task_id: input.taskId,
-    branch: getBranch() ?? undefined,
+    branch: getBranch(input.cwd) ?? undefined,
     type: input.type,
     content: input.content,
   });
