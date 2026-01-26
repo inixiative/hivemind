@@ -47,6 +47,7 @@ export type RegisterInput = {
   sessionId?: string;
   pid?: number;
   contextSummary?: string;
+  cwd?: string;
 };
 
 export type RegisterResult = {
@@ -60,11 +61,11 @@ export type RegisterResult = {
 export function executeRegister(input: RegisterInput): RegisterResult {
   const db = getConnection(input.project);
 
-  // Sync worktrees from git
-  syncWorktreesFromGit(db);
+  // Sync worktrees from git (use cwd for correct repo context)
+  syncWorktreesFromGit(db, input.cwd);
 
-  // Find current worktree
-  const gitWorktree = getCurrentWorktree();
+  // Find current worktree (use cwd to detect correct worktree)
+  const gitWorktree = getCurrentWorktree(input.cwd);
   let worktreeId: string | undefined;
 
   if (gitWorktree) {
@@ -72,7 +73,7 @@ export function executeRegister(input: RegisterInput): RegisterResult {
     worktreeId = dbWorktree?.id;
   }
 
-  const branch = getBranch() ?? undefined;
+  const branch = getBranch(input.cwd) ?? undefined;
 
   // Check if agent already exists with this PID (reconnecting after compaction)
   let agent = input.pid ? getAgentByPid(db, input.pid) : null;

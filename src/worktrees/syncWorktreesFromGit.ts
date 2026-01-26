@@ -11,8 +11,8 @@ import type { WorktreeRecord } from './types';
  * Sync worktrees from git into the database
  * Returns list of all worktrees after sync
  */
-export function syncWorktreesFromGit(db: Database): WorktreeRecord[] {
-  const gitWorktrees = getGitWorktrees();
+export function syncWorktreesFromGit(db: Database, cwd?: string): WorktreeRecord[] {
+  const gitWorktrees = getGitWorktrees(cwd);
   const results: WorktreeRecord[] = [];
 
   for (const wt of gitWorktrees) {

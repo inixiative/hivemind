@@ -67,6 +67,7 @@ export function runSessionStartHook(input?: HookInput) {
       label,
       sessionId,
       pid,
+      cwd: input?.cwd,
     });
 
     // Get status to show other agents

@@ -10,9 +10,9 @@ export type Worktree = {
 /**
  * Get all git worktrees for the repository
  */
-export function getWorktrees(): Worktree[] {
+export function getWorktrees(cwd?: string): Worktree[] {
   try {
-    const output = execSync('git worktree list --porcelain', { stdio: 'pipe' })
+    const output = execSync('git worktree list --porcelain', { stdio: 'pipe', cwd })
       .toString()
       .trim();
 
