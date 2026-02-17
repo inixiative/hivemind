@@ -14,6 +14,7 @@ import { getActiveAgents } from '../agents/getActiveAgents';
 import { markAgentDead } from '../agents/markAgentDead';
 import { startPlanWatcher } from '../watcher/planWatcher';
 import { emit } from '../events/emit';
+import { getAgentLeaseTtlMs, isNetworkLivenessMode } from '../agents/livenessMode';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -41,6 +42,13 @@ function isOldEnough(createdAt: string): boolean {
   const created = parseDatetime(createdAt);
   if (!created) return false;
   return Date.now() - created.getTime() > MIN_AGE_MS;
+}
+
+function isLeaseExpired(lastSeenAt: string | null, createdAt: string, ttlMs: number): boolean {
+  const source = lastSeenAt ?? createdAt;
+  const seen = parseDatetime(source);
+  if (!seen) return false;
+  return Date.now() - seen.getTime() > ttlMs;
 }
 
 type CoordinatorConfig = {
@@ -103,12 +111,40 @@ function releaseLock(config: CoordinatorConfig): void {
 
 function sweep(config: CoordinatorConfig): number {
   const db = getConnection(config.project);
+  const networkMode = isNetworkLivenessMode();
+  const leaseTtlMs = getAgentLeaseTtlMs();
 
   // Get all active agents and check if their PIDs are alive
   const activeAgents = getActiveAgents(db);
   let marked = 0;
 
   for (const agent of activeAgents) {
+    if (networkMode) {
+      if (!isLeaseExpired(agent.last_seen_at, agent.created_at, leaseTtlMs)) {
+        continue;
+      }
+
+      markAgentDead(db, agent.id);
+
+      emit(db, {
+        type: 'agent:dead',
+        agent_id: agent.id,
+        worktree_id: agent.worktree_id ?? undefined,
+        content: `Agent ${agent.id} lease expired`,
+        metadata: {
+          reason: 'lease_expired',
+          last_seen_at: agent.last_seen_at,
+          lease_ttl_ms: leaseTtlMs,
+          label: agent.label,
+          current_task_id: agent.current_task_id,
+          current_plan_id: agent.current_plan_id,
+        },
+      });
+
+      marked++;
+      continue;
+    }
+
     // Skip agents that are too new (grace period)
     if (!isOldEnough(agent.created_at)) {
       continue;

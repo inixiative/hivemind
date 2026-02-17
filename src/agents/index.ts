@@ -16,5 +16,6 @@ export { updateAgentContext } from './updateAgentContext';
 export { updateAgentTask } from './updateAgentTask';
 export { updateAgentWorktree } from './updateAgentWorktree';
 export { updateAgentSession } from './updateAgentSession';
+export { touchAgent } from './touchAgent';
 export { markAgentDead } from './markAgentDead';
 export { markAgentIdle } from './markAgentIdle';

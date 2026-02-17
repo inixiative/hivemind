@@ -3,6 +3,8 @@
  */
 
 import { getConnection } from '../../db/getConnection';
+import { getAgentBySessionId } from '../../agents/getAgentBySessionId';
+import { touchAgent } from '../../agents/touchAgent';
 import { getRecentEvents } from '../../events/getRecentEvents';
 import { getEventsSince } from '../../events/getEventsSince';
 import type { Event } from '../../events/types';
@@ -23,6 +25,8 @@ export const eventsTool = {
       limit: { type: 'number', description: 'Max events to return (default 20)' },
       since: { type: 'string', description: 'ISO timestamp - get events after this time' },
       type: { type: 'string', description: 'Filter by event type (e.g., "task:claim", "decision")' },
+      agentId: { type: 'string', description: 'Optional agent ID to heartbeat in network mode' },
+      sessionId: { type: 'string', description: 'Optional session ID to resolve agent heartbeat' },
     },
     required: ['project'],
   },
@@ -33,6 +37,8 @@ export type EventsInput = {
   limit?: number;
   since?: string;
   type?: string;
+  agentId?: string;
+  sessionId?: string;
 };
 
 export type EventsResult = {
@@ -52,6 +58,15 @@ export type EventsResult = {
 export function executeEvents(input: EventsInput): EventsResult {
   const db = getConnection(input.project);
   const limit = input.limit ?? 20;
+
+  if (input.agentId) {
+    touchAgent(db, input.agentId);
+  } else if (input.sessionId) {
+    const agent = getAgentBySessionId(db, input.sessionId);
+    if (agent) {
+      touchAgent(db, agent.id);
+    }
+  }
 
   let events: Event[];
 

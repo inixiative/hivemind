@@ -1,4 +1,5 @@
 import type { Database } from 'bun:sqlite';
+import { now } from '../datetime/now';
 
 /**
  * Update an agent's session ID
@@ -9,8 +10,9 @@ export function updateAgentSession(
   agentId: string,
   sessionId: string
 ): void {
+  const timestamp = now();
   const stmt = db.prepare(`
-    UPDATE agents SET session_id = ? WHERE id = ?
+    UPDATE agents SET session_id = ?, last_seen_at = ? WHERE id = ?
   `);
-  stmt.run(sessionId, agentId);
+  stmt.run(sessionId, timestamp, agentId);
 }

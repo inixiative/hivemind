@@ -1,6 +1,8 @@
 import { getConnection } from '../../db/getConnection';
 import { registerAgent } from '../../agents/registerAgent';
 import { getAgentByPid } from '../../agents/getAgentByPid';
+import { getAgentBySessionId } from '../../agents/getAgentBySessionId';
+import { touchAgent } from '../../agents/touchAgent';
 import { updateAgentSession } from '../../agents/updateAgentSession';
 import { emit } from '../../events/emit';
 import { syncWorktreesFromGit } from '../../worktrees/syncWorktreesFromGit';
@@ -75,13 +77,19 @@ export function executeRegister(input: RegisterInput): RegisterResult {
 
   const branch = getBranch(input.cwd) ?? undefined;
 
-  // Check if agent already exists with this PID (reconnecting after compaction)
-  let agent = input.pid ? getAgentByPid(db, input.pid) : null;
+  // Reconnect by session first (remote-safe), then PID fallback for local compaction.
+  let agent = input.sessionId ? getAgentBySessionId(db, input.sessionId) : null;
+  if (!agent && input.pid) {
+    agent = getAgentByPid(db, input.pid);
+  }
   let isReconnect = false;
 
-  if (agent && input.sessionId) {
-    // Update existing agent's session ID (compaction scenario)
-    updateAgentSession(db, agent.id, input.sessionId);
+  if (agent) {
+    if (input.sessionId && agent.session_id !== input.sessionId) {
+      // Update existing agent's session ID (compaction or remote reconnect scenario)
+      updateAgentSession(db, agent.id, input.sessionId);
+    }
+    touchAgent(db, agent.id);
     isReconnect = true;
   } else {
     // Register new agent

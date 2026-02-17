@@ -25,6 +25,8 @@ const AUTO_APPROVED_TOOLS = [
   'mcp__hivemind__hivemind_status',
   'mcp__hivemind__hivemind_events',
   'mcp__hivemind__hivemind_query',
+  // Event logging
+  'mcp__hivemind__hivemind_emit',
   // Task management (structured operations)
   'mcp__hivemind__hivemind_claim_task',
   'mcp__hivemind__hivemind_start_task',
@@ -34,7 +36,6 @@ const AUTO_APPROVED_TOOLS = [
 ];
 
 // NOT auto-approved (require human oversight):
-// - hivemind_emit: allows arbitrary messages to other agents
 // - hivemind_reset: destructive operation that wipes the database
 
 /**

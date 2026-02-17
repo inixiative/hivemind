@@ -10,6 +10,7 @@ import { claimTask } from '../../tasks/claimTask';
 import { completeTask } from '../../tasks/completeTask';
 import { startTask } from '../../tasks/startTask';
 import { emit } from '../../events/emit';
+import { touchAgent } from '../../agents/touchAgent';
 
 // ─────────────────────────────────────────────────────────────
 // Claim Task
@@ -64,6 +65,7 @@ export function executeClaimTask(input: ClaimTaskInput): {
   if (!result) {
     return { success: false, message: `Failed to claim task ${input.taskId}` };
   }
+  touchAgent(db, input.agentId);
 
   emit(db, {
     type: 'task:claim',
@@ -122,6 +124,7 @@ export function executeStartTask(input: StartTaskInput): {
   }
 
   startTask(db, input.taskId);
+  touchAgent(db, input.agentId);
 
   emit(db, {
     type: 'task:start',
@@ -183,6 +186,7 @@ export function executeCompleteTask(input: CompleteTaskInput): {
   if (!result) {
     return { success: false, message: `Failed to complete task ${input.taskId}` };
   }
+  touchAgent(db, input.agentId);
 
   emit(db, {
     type: 'task:complete',

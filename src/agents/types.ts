@@ -13,6 +13,7 @@ export type Agent = {
   status: AgentStatus;
   pid: number | null;
   session_id: string | null;
+  last_seen_at: string | null;
   current_plan_id: string | null;
   current_task_id: string | null;
   worktree_id: string | null;

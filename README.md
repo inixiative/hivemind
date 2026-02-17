@@ -49,11 +49,11 @@ This info goes into Claude's system context (not printed to terminal). Claude kn
 
 ## How It Works
 
-Agents are tracked by **process ID (PID)**, not heartbeats:
-- SessionStart hook registers agent with Claude's PID
-- Coordinator monitors PIDs every 30 seconds
-- When Claude exits, coordinator detects dead PID and marks agent dead
-- No polling or heartbeats required
+Hivemind supports two lifecycle modes:
+- Local mode (stdio): agents are tracked by **PID** and the coordinator marks agents dead when their process exits.
+- Network mode (HTTP): agents are tracked by **lease heartbeat** (`last_seen_at`) and the coordinator marks agents dead when lease TTL expires.
+
+Session start registers the agent, then status/events/query/task/emit calls refresh liveness in network mode.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
@@ -70,10 +70,71 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 | `hivemind_worktree_cleanup` | Clean up stale worktrees | ✓ |
 | `hivemind_setup` | Initialize project | ✓ |
 | `hivemind_register` | Register this agent | ✓ |
-| `hivemind_emit` | Emit event to log | ✗ |
+| `hivemind_emit` | Emit event to log | ✓ |
 | `hivemind_reset` | Reset database | ✗ |
 
 Tools marked ✓ are auto-approved after `./setup.sh`. Tools marked ✗ require confirmation.
+
+## Server Modes
+
+### Local mode (default, stdio)
+
+Use this for single-machine/local Claude sessions:
+
+```bash
+bun run mcp
+```
+
+This preserves the existing MCP stdio behavior and local PID-based lifecycle.
+
+### Network mode (shared MCP over HTTP)
+
+Use this when multiple containers/processes need to share one hivemind:
+
+```bash
+HIVEMIND_API_TOKEN=replace-me \
+PORT=8787 \
+bun run mcp:http
+```
+
+The HTTP endpoint is:
+
+```text
+http://0.0.0.0:$PORT/mcp
+```
+
+Network mode requires:
+- `Authorization: Bearer <HIVEMIND_API_TOKEN>` on MCP HTTP requests
+- Lease/heartbeat lifecycle (`last_seen_at`) with TTL sweeping (no PID liveness reliance)
+
+## Environment Variables
+
+- `HIVEMIND_API_TOKEN`: required for `bun run mcp:http`
+- `PORT`: HTTP port for network mode (default `8787`)
+- `HIVEMIND_REMOTE_URL`: when set in hook/agent environments, session-start register/status calls go to remote MCP instead of local DB logic
+- `HIVEMIND_AGENT_LEASE_TTL_SECONDS`: lease TTL for stale-agent sweep in network mode (default `180`)
+- `HIVEMIND_NETWORK_MODE`: liveness mode toggle (`1/true` enables lease-based mode). `mcp:http` enables this automatically.
+- `HIVEMIND_BASE`: base directory for project DB/state (defaults to `~/.hivemind`)
+
+## Container-to-Container Example
+
+Shared hivemind service container:
+
+```bash
+docker run --rm -p 8787:8787 \
+  -e HIVEMIND_API_TOKEN=supersecret \
+  ghcr.io/inixiative/hivemind:latest \
+  bun run mcp:http
+```
+
+Implementer/subject/oracle containers (each agent):
+
+```bash
+export HIVEMIND_REMOTE_URL=http://hivemind:8787/mcp
+export HIVEMIND_API_TOKEN=supersecret
+```
+
+With `HIVEMIND_REMOTE_URL` set, `src/hooks/sessionStart.ts` registers and fetches status through the remote service, enabling shared coordination across isolated containers.
 
 ## CLI
 
