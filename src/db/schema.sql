@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS agents (
   status TEXT DEFAULT 'active',           -- active/idle/dead
   pid INTEGER,                            -- listener process ID
   session_id TEXT,                        -- for claude --resume
+  last_seen_at TEXT,                      -- heartbeat/lease timestamp
   current_plan_id TEXT,                   -- pln_e9d2c1_auth
   current_task_id TEXT,                   -- tsk_e9d2c1_001
   worktree_id TEXT,                       -- wkt_a1b2c3
@@ -99,6 +100,7 @@ CREATE TABLE IF NOT EXISTS events (
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
+CREATE INDEX IF NOT EXISTS idx_agents_last_seen ON agents(last_seen_at);
 CREATE INDEX IF NOT EXISTS idx_agents_plan ON agents(current_plan_id);
 CREATE INDEX IF NOT EXISTS idx_agents_worktree ON agents(worktree_id);
 

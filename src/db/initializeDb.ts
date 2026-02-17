@@ -4,6 +4,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getProjectPaths } from './getProjectPaths';
 import { ensureProjectDirs } from './ensureProjectDirs';
+import { migrateDb } from './migrateDb';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,6 +25,7 @@ export function initializeDb(projectName: string): Database {
   // Run schema
   const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf-8');
   db.exec(schema);
+  migrateDb(db);
 
   return db;
 }

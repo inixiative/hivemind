@@ -12,8 +12,10 @@
  * Claude Code passes JSON via stdin with session_id, transcript_path, cwd, etc.
  */
 
-import { executeRegister } from '../mcp/tools/register';
-import { executeStatus } from '../mcp/tools/status';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { executeRegister, type RegisterResult } from '../mcp/tools/register';
+import { executeStatus, type StatusResult } from '../mcp/tools/status';
 import { getGitInfo } from '../git/getGitInfo';
 
 type HookInput = {
@@ -22,6 +24,21 @@ type HookInput = {
   cwd?: string;
   permission_mode?: string;
 };
+
+function getTextContent(result: unknown, errorPrefix: string): string {
+  if (!result || typeof result !== 'object') {
+    throw new Error(`${errorPrefix} returned invalid payload`);
+  }
+
+  const content = (result as { content?: Array<{ type?: string; text?: string }> }).content;
+  const text = content?.find((item) => item?.type === 'text')?.text;
+
+  if (!text) {
+    throw new Error(`${errorPrefix} returned no text content`);
+  }
+
+  return text;
+}
 
 function readStdinSync(): string {
   try {
@@ -47,7 +64,7 @@ function readStdinSync(): string {
   }
 }
 
-export function runSessionStartHook(input?: HookInput) {
+export async function runSessionStartHook(input?: HookInput) {
   // Use cwd from hook input (Claude's actual working directory), not process.cwd()
   const gitInfo = getGitInfo(input?.cwd);
 
@@ -59,40 +76,98 @@ export function runSessionStartHook(input?: HookInput) {
   const label = process.env.CLAUDE_AGENT_LABEL;
 
   try {
-    // process.ppid is Claude's process (or close to it in the process tree)
-    const pid = process.ppid;
+      const remoteUrl = process.env.HIVEMIND_REMOTE_URL?.trim();
+      let result: RegisterResult;
+      let status: StatusResult;
 
-    const result = executeRegister({
-      project: gitInfo.repoName,
-      label,
-      sessionId,
-      pid,
-      cwd: input?.cwd,
-    });
+      if (remoteUrl) {
+        const token = process.env.HIVEMIND_API_TOKEN?.trim();
+        if (!token) {
+          throw new Error('HIVEMIND_API_TOKEN is required when HIVEMIND_REMOTE_URL is set');
+        }
 
-    // Get status to show other agents
-    const status = executeStatus({ project: gitInfo.repoName });
-    const otherAgents = status.activeAgents?.filter((a: any) => a.id !== result.agentId) || [];
+        const client = new Client(
+          {
+            name: 'hivemind-session-start',
+            version: '0.1.0',
+          },
+          { capabilities: {} }
+        );
 
-    // Output agent info for Claude's context
-    const lines = [
-      `hivemind: ${result.agentId} joined ${gitInfo.repoName}`,
-    ];
+        const transport = new StreamableHTTPClientTransport(new URL(remoteUrl), {
+          requestInit: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        });
 
-    if (result.branch) {
-      lines[0] += ` (${result.branch})`;
-    }
+        await client.connect(transport);
+        try {
+          const registerCall = await client.callTool({
+            name: 'hivemind_register',
+            arguments: {
+              project: gitInfo.repoName,
+              label,
+              sessionId,
+              cwd: input?.cwd,
+            },
+          });
 
-    // Include session_id so Claude can use it for MCP calls
-    if (sessionId) {
-      lines.push(`  session: ${sessionId}`);
-    }
+          const registerText = getTextContent(registerCall, 'Remote hivemind_register');
+          result = JSON.parse(registerText) as RegisterResult;
 
-    if (otherAgents.length > 0) {
-      lines.push(`  active: ${otherAgents.map((a: any) => a.id).join(', ')}`);
-    }
+          const statusCall = await client.callTool({
+            name: 'hivemind_status',
+            arguments: {
+              project: gitInfo.repoName,
+              agentId: result.agentId,
+              sessionId,
+            },
+          });
 
-    console.log(lines.join('\n'));
+          const statusText = getTextContent(statusCall, 'Remote hivemind_status');
+          status = JSON.parse(statusText) as StatusResult;
+        } finally {
+          await client.close();
+        }
+      } else {
+        // process.ppid is Claude's process (or close to it in the process tree)
+        const pid = process.ppid;
+
+        result = executeRegister({
+          project: gitInfo.repoName,
+          label,
+          sessionId,
+          pid,
+          cwd: input?.cwd,
+        });
+
+        // Get status to show other agents
+        status = executeStatus({ project: gitInfo.repoName });
+      }
+
+      const otherAgents = status.activeAgents?.filter((a: any) => a.id !== result.agentId) || [];
+
+      // Output agent info for Claude's context
+      const lines = [
+        `hivemind: ${result.agentId} joined ${gitInfo.repoName}`,
+      ];
+
+      if (result.branch) {
+        lines[0] += ` (${result.branch})`;
+      }
+
+      // Include session_id so Claude can use it for MCP calls
+      if (sessionId) {
+        lines.push(`  session: ${sessionId}`);
+      }
+
+      if (otherAgents.length > 0) {
+        lines.push(`  active: ${otherAgents.map((a: any) => a.id).join(', ')}`);
+      }
+
+      console.log(lines.join('\n'));
   } catch (error) {
     console.error(`hivemind error: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -112,5 +187,5 @@ if (import.meta.main) {
     }
   }
 
-  runSessionStartHook(input);
+  await runSessionStartHook(input);
 }

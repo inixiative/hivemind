@@ -1,5 +1,7 @@
 import { getConnection } from '../../db/getConnection';
 import { getActiveAgents } from '../../agents/getActiveAgents';
+import { getAgentBySessionId } from '../../agents/getAgentBySessionId';
+import { touchAgent } from '../../agents/touchAgent';
 import { getAllWorktrees } from '../../worktrees/getAllWorktrees';
 import { getRecentEvents } from '../../events/getRecentEvents';
 import { getActivePlans } from '../../plans/getActivePlans';
@@ -25,6 +27,14 @@ export const statusTool = {
         type: 'string',
         description: 'Project name',
       },
+      agentId: {
+        type: 'string',
+        description: 'Optional agent ID to heartbeat in network mode',
+      },
+      sessionId: {
+        type: 'string',
+        description: 'Optional session ID to resolve agent heartbeat',
+      },
     },
     required: ['project'],
   },
@@ -32,6 +42,8 @@ export const statusTool = {
 
 export type StatusInput = {
   project: string;
+  agentId?: string;
+  sessionId?: string;
 };
 
 export type PlanWithTasks = Plan & {
@@ -132,6 +144,15 @@ function filterEventsByWorktree(events: Event[], worktree: WorktreeRecord): Even
 
 export function executeStatus(input: StatusInput): StatusResult {
   const db = getConnection(input.project);
+
+  if (input.agentId) {
+    touchAgent(db, input.agentId);
+  } else if (input.sessionId) {
+    const agent = getAgentBySessionId(db, input.sessionId);
+    if (agent) {
+      touchAgent(db, agent.id);
+    }
+  }
 
   const activeAgents = getActiveAgents(db);
   const rawWorktrees = getAllWorktrees(db);

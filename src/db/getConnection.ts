@@ -2,6 +2,7 @@ import { Database } from 'bun:sqlite';
 import { existsSync } from 'fs';
 import { getProjectPaths } from './getProjectPaths';
 import { initializeDb } from './initializeDb';
+import { migrateDb } from './migrateDb';
 
 const connections = new Map<string, Database>();
 
@@ -22,6 +23,7 @@ export function getConnection(projectName: string): Database {
   if (existsSync(paths.dbPath)) {
     db = new Database(paths.dbPath);
     db.exec('PRAGMA journal_mode = WAL');
+    migrateDb(db);
   } else {
     db = initializeDb(projectName);
   }

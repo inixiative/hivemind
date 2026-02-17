@@ -16,8 +16,8 @@ export function registerAgent(
   const timestamp = now();
 
   const stmt = db.prepare(`
-    INSERT INTO agents (id, hex, label, status, pid, session_id, worktree_id, context_summary, created_at)
-    VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)
+    INSERT INTO agents (id, hex, label, status, pid, session_id, last_seen_at, worktree_id, context_summary, created_at)
+    VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)
   `);
 
   stmt.run(
@@ -26,6 +26,7 @@ export function registerAgent(
     parsed.label ?? null,
     input.pid ?? null,
     input.session_id ?? null,
+    timestamp,
     input.worktree_id ?? null,
     input.context_summary ?? null,
     timestamp
@@ -38,6 +39,7 @@ export function registerAgent(
     status: 'active',
     pid: input.pid ?? null,
     session_id: input.session_id ?? null,
+    last_seen_at: timestamp,
     current_plan_id: null,
     current_task_id: null,
     worktree_id: input.worktree_id ?? null,

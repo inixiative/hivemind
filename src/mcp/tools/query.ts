@@ -1,4 +1,6 @@
 import { getConnection } from '../../db/getConnection';
+import { getAgentBySessionId } from '../../agents/getAgentBySessionId';
+import { touchAgent } from '../../agents/touchAgent';
 import { getRecentEvents } from '../../events/getRecentEvents';
 import { getEventsByPlan } from '../../events/getEventsByPlan';
 import { getEventsByAgent } from '../../events/getEventsByAgent';
@@ -42,6 +44,10 @@ export const queryTool = {
         type: 'number',
         description: 'Max events to return (default 50)',
       },
+      sessionId: {
+        type: 'string',
+        description: 'Optional session ID to resolve agent heartbeat',
+      },
     },
     required: ['project'],
   },
@@ -54,6 +60,7 @@ export type QueryInput = {
   branch?: string;
   since?: string;
   limit?: number;
+  sessionId?: string;
 };
 
 export type QueryResult = {
@@ -64,6 +71,15 @@ export type QueryResult = {
 export function executeQuery(input: QueryInput): QueryResult {
   const db = getConnection(input.project);
   const limit = input.limit ?? 50;
+
+  if (input.agentId) {
+    touchAgent(db, input.agentId);
+  } else if (input.sessionId) {
+    const agent = getAgentBySessionId(db, input.sessionId);
+    if (agent) {
+      touchAgent(db, agent.id);
+    }
+  }
 
   let events: Event[];
 

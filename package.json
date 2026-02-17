@@ -43,6 +43,7 @@
     "dev": "tsc --watch",
     "test": "bun test src/",
     "mcp": "bun run src/mcp/server.ts",
+    "mcp:http": "bun run src/mcp/httpServer.ts",
     "cli": "bun run src/cli.ts"
   },
   "dependencies": {

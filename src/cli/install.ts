@@ -45,8 +45,8 @@ export async function installCommand() {
   console.log(`  ${permResult.message}`);
 
   if (permResult.added.length > 0) {
-    console.log('  auto-approved: status, events, query, claim/start/complete task');
-    console.log('  requires approval: emit (ad-hoc messages)');
+    console.log('  auto-approved: status, events, query, emit, claim/start/complete task');
+    console.log('  requires approval: reset (destructive)');
   }
 
   // Success

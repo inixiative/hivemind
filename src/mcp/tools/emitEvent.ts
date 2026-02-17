@@ -3,6 +3,8 @@ import { getProjectPaths } from '../../db/getProjectPaths';
 import { emit } from '../../events/emit';
 import { getAgentBySessionId } from '../../agents/getAgentBySessionId';
 import { getAgentByPid } from '../../agents/getAgentByPid';
+import { touchAgent } from '../../agents/touchAgent';
+import { isNetworkLivenessMode } from '../../agents/livenessMode';
 import { ensureCoordinator } from '../../coordinator/spawn';
 import { getBranch } from '../../git/getBranch';
 import type { EventType } from '../../events/types';
@@ -76,6 +78,7 @@ export type EmitEventResult = {
 export function executeEmitEvent(input: EmitEventInput): EmitEventResult {
   const db = getConnection(input.project);
   const paths = getProjectPaths(input.project);
+  const networkMode = isNetworkLivenessMode();
 
   // Ensure coordinator is running
   ensureCoordinator({ project: input.project, dataDir: paths.projectDir });
@@ -89,7 +92,7 @@ export function executeEmitEvent(input: EmitEventInput): EmitEventResult {
     const agent = getAgentBySessionId(db, input.sessionId);
     agentId = agent?.id;
   }
-  if (!agentId) {
+  if (!agentId && !networkMode) {
     // Try PID fallback - process.ppid is Claude's process
     const agent = getAgentByPid(db, process.ppid);
     agentId = agent?.id;
@@ -98,9 +101,13 @@ export function executeEmitEvent(input: EmitEventInput): EmitEventResult {
   if (!agentId) {
     return {
       success: false,
-      message: 'No agent found - provide agentId or valid sessionId',
+      message: networkMode
+        ? 'No agent found - provide agentId or valid sessionId in network mode'
+        : 'No agent found - provide agentId or valid sessionId',
     };
   }
+
+  touchAgent(db, agentId);
 
   const event = emit(db, {
     agent_id: agentId,
