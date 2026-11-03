@@ -1,10 +1,12 @@
 # Hivemind
 
-Multi-agent coordination for Claude Code. Shared event log, plans, and tasks across multiple Claude sessions.
+> **Paused.** Not actively maintained and not recommended for use; it is likely to be revived. One of the [inixiative](https://www.inixiative.com) projects; see [all of them](https://github.com/inixiative).
+
+Multi-agent coordination for Claude Code over MCP: a shared event log, plans and tasks across several Claude sessions.
 
 ## Installation
 
-### From npm (recommended)
+### From npm
 
 ```bash
 npm install -g @inixiative/hivemind
