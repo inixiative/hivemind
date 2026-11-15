@@ -6,6 +6,8 @@ Multi-agent coordination for Claude Code over MCP: a shared event log, plans and
 
 ## Installation
 
+Hivemind needs the [Bun](https://bun.sh) runtime: it uses `bun:sqlite` and `Bun.serve`.
+
 ### From npm
 
 ```bash
@@ -117,6 +119,7 @@ Network mode requires:
 - `HIVEMIND_AGENT_LEASE_TTL_SECONDS`: lease TTL for stale-agent sweep in network mode (default `180`)
 - `HIVEMIND_NETWORK_MODE`: liveness mode toggle (`1/true` enables lease-based mode). `mcp:http` enables this automatically.
 - `HIVEMIND_BASE`: base directory for project DB/state (defaults to `~/.hivemind`)
+- `CLAUDE_AGENT_LABEL`: optional label the session-start hook gives the agent (it becomes part of the agent ID)
 
 ## Container-to-Container Example
 
@@ -161,15 +164,18 @@ hivemind join       # Join as an agent
 ## Event Types
 
 ```
-agent:register/unregister
-plan:create/join/complete
-task:create/claim/start/complete/block
-decision, question, answer, note
+agent:register/unregister/dead
+worktree:register/switch/stale
+plan:create/sync/join/leave/complete
+task:create/claim/unclaim/start/block/unblock/complete
+decision, question, answer, context, note
 ```
+
+Agents emit the free-form types (`decision`, `question`, `answer`, `context`, `note`). Hivemind itself emits `agent:register`, `agent:dead`, `worktree:register`, `worktree:stale`, `plan:create`, `plan:sync`, `task:create`, `task:claim`, `task:start` and `task:complete`. The other types are declared, but nothing emits them yet.
 
 ## Database
 
-Stored at `~/.hivemind/claude_hivemind_{project}/hivemind.db`
+Stored at `~/.hivemind/claude_hivemind_{project}/hivemind.db`, where `{project}` is the project name lowercased with every character outside `a-z0-9` replaced by `_`.
 
 Tables: agents, plans, tasks, events, worktrees
 

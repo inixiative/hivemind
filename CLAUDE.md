@@ -7,7 +7,7 @@ Multi-agent coordination system for Claude Code.
 ```bash
 bun install
 bun test
-bun run src/cli.ts status hivemind
+bun run src/cli.ts status -p hivemind
 ```
 
 ## Hivemind Events

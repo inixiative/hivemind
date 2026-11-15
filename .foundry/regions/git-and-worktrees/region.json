@@ -1,0 +1,35 @@
+{
+  "id": "git-and-worktrees",
+  "title": "Git helpers and worktrees",
+  "routing": "Is this about asking git about a directory (is it a repo, which branch, the repo name or root, the list of git worktrees, which worktree a directory is in) through src/git (isGitRepo, getBranch, getRepoName, getRepoRoot, getGitInfo, getWorktrees, getCurrentWorktree), or keeping hivemind's worktree records in step with git: syncWorktreesFromGit, registerWorktree, the worktree lookups and touches, and hivemind_worktree_cleanup removing records whose path is gone (worktree:register, worktree:stale)?",
+  "concepts": [
+    "git-helpers",
+    "worktrees"
+  ],
+  "tokens": 5437,
+  "tokenMethod": "chars/4",
+  "files": {
+    "recognise": {
+      "path": "recognise.md",
+      "tokens": 1065,
+      "experimental": true,
+      "note": "a smaller recognise-only document; knowledge.md is the Warden document"
+    },
+    "knowledge": {
+      "path": "knowledge.md",
+      "tokens": 5437
+    }
+  },
+  "runsAgreed": 2,
+  "sources": {
+    "docs": [],
+    "docUnits": [],
+    "catalogClusters": [
+      "primitive-worktrees-and-git"
+    ],
+    "codeEntries": 17,
+    "docMembers": 1
+  },
+  "bypassLines": 7,
+  "glossaryTerms": 23
+}

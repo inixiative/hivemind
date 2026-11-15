@@ -1,0 +1,45 @@
+{
+  "id": "mcp-server",
+  "title": "MCP tools and transports",
+  "routing": "Is this about defining, adding, listing or dispatching a hivemind_* MCP tool (HIVEMIND_TOOL_DEFS, executeToolByName, createMcpServer in src/mcp/core.ts, the tool def + executeX files in src/mcp/tools/), or about serving them to Claude: the stdio server (bun run mcp, hivemind-mcp, src/mcp/server.ts) or the streamable-HTTP server (startHttpMcpServer, bun run mcp:http, PORT, HIVEMIND_API_TOKEN bearer auth, /health, /mcp, mcp-session-id)? Jobs: add a new tool, expose the tools to Claude, run one shared hivemind over the network for containers, fix a 401.",
+  "concepts": [
+    "mcp-tools",
+    "mcp-transports"
+  ],
+  "tokens": 6078,
+  "tokenMethod": "chars/4",
+  "files": {
+    "recognise": {
+      "path": "recognise.md",
+      "tokens": 1003,
+      "experimental": true,
+      "note": "a smaller recognise-only document; knowledge.md is the Warden document"
+    },
+    "knowledge": {
+      "path": "knowledge.md",
+      "tokens": 6078
+    }
+  },
+  "runsAgreed": 2,
+  "sources": {
+    "docs": [
+      "ARCHITECTURE.md",
+      "README.md"
+    ],
+    "docUnits": [
+      "doc:ARCHITECTURE.md#overview",
+      "doc:ARCHITECTURE.md#core-components",
+      "doc:README.md#tools",
+      "doc:README.md#server-modes",
+      "doc:README.md#environment-variables"
+    ],
+    "catalogClusters": [
+      "primitive-mcp-tools",
+      "primitive-network-mode"
+    ],
+    "codeEntries": 4,
+    "docMembers": 9
+  },
+  "bypassLines": 5,
+  "glossaryTerms": 21
+}

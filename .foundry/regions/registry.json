@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "project": "hivemind",
+  "builtFrom": {
+    "docs": [
+      "README.md",
+      "ARCHITECTURE.md",
+      "CLAUDE.md"
+    ],
+    "excluded": [
+      {
+        "path": ".hivemind/plans/multi-agent-test-2.md",
+        "kind": "workItem",
+        "reason": "Work item: the test plan for a multi-agent demo run, whose output is src/utils/ (excluded from codeScope)."
+      },
+      {
+        "path": "src/utils/**",
+        "kind": "excluded",
+        "reason": "Demo artifacts: math and string helpers written by agents during a multi-agent coordination test (.hivemind/plans/multi-agent-test-2.md); nothing in hivemind imports them."
+      },
+      {
+        "path": "src/test/multiAgentDemo.ts",
+        "kind": "excluded",
+        "reason": "Demo artifact: greeting/farewell functions from a multi-agent test, not hivemind code."
+      }
+    ],
+    "catalog": "code read through the repo's Atlas map when it has one, else the plan's code scope; described with Foundry's catalog describer prompts",
+    "atlas": ".atlas/concepts.ts",
+    "libraries": {},
+    "method": "three independent model proposals, item-level majority vote (2 of 3), seams to the size ceiling, per-region authoring"
+  },
+  "concepts": [
+    {
+      "tag": "mcp-tools",
+      "atlas": "primitive:mcp-tools",
+      "description": "Defining and dispatching the hivemind_* MCP tools: HIVEMIND_TOOL_DEFS, executeToolByName, createMcpServer, the tool-def + executeX pattern, the 11-tool table and auto-approval",
+      "region": "mcp-server"
+    },
+    {
+      "tag": "mcp-transports",
+      "atlas": "primitive:network-mode",
+      "description": "Serving the tools: stdio server (bun run mcp, hivemind-mcp) and the streamable-HTTP server startHttpMcpServer (PORT, bearer HIVEMIND_API_TOKEN, /health, one transport per mcp-session-id)",
+      "region": "mcp-server"
+    },
+    {
+      "tag": "session-start-hook",
+      "atlas": "primitive:session-start-hook",
+      "description": "The Claude Code SessionStart hook runSessionStartHook: stdin JSON, project from git repo name, local register+status or remote via HIVEMIND_REMOTE_URL, CLAUDE_AGENT_LABEL, context output",
+      "region": "claude-code-integration"
+    },
+    {
+      "tag": "install-and-init",
+      "atlas": "primitive:cli-and-install",
+      "description": "Setting hivemind up in Claude Code: install (claude mcp add, permissions), init (DB, SessionStart hooks in .claude/settings.json, generated .claude/CLAUDE.md from the Hivemind Events section)",
+      "region": "claude-code-integration"
+    },
+    {
+      "tag": "cli",
+      "atlas": "primitive:cli-and-install",
+      "description": "The hivemind CLI commands (commander, src/cli.ts): status, join, watch and the command wiring",
+      "region": "claude-code-integration"
+    },
+    {
+      "tag": "dev-runtime",
+      "atlas": null,
+      "description": "Bun-only runtime (bun:sqlite, no Node, no better-sqlite3) and the dev checks bun test src/ and tsc",
+      "region": "claude-code-integration"
+    },
+    {
+      "tag": "agent-registry",
+      "atlas": "primitive:agents-and-coordinator",
+      "description": "Agent records: registerAgent, reconnect by session id then PID, getAgent*, updateAgent*, hivemind_register and hivemind_status",
+      "region": "agents-and-liveness"
+    },
+    {
+      "tag": "agent-liveness",
+      "atlas": "primitive:network-mode",
+      "description": "Deciding an agent is alive or dead: local PID mode vs network lease mode (isNetworkLivenessMode, getAgentLeaseTtlMs, last_seen_at, touchAgent), markAgentDead releasing tasks",
+      "region": "agents-and-liveness"
+    },
+    {
+      "tag": "coordinator",
+      "atlas": "primitive:agents-and-coordinator",
+      "description": "The per-project detached coordinator: ensureCoordinator from hivemind_emit, pid/lock files, runCoordinator 30 s sweep emitting agent:dead, hosting the plan watcher",
+      "region": "agents-and-liveness"
+    },
+    {
+      "tag": "event-log",
+      "atlas": "primitive:events",
+      "description": "The shared event log: emit, getEventsSince/By*, getRecentEvents, hivemind_emit/query/events, event types actually emitted, how agents should post events",
+      "region": "event-log"
+    },
+    {
+      "tag": "plan-sync",
+      "atlas": "primitive:plan-sync",
+      "description": "Plan files into plans and tasks: startPlanWatcher, syncPlanFile, initialPlanSync, regex extractTasksFromPlan, reconcileTasks, plan records",
+      "region": "plans-and-tasks"
+    },
+    {
+      "tag": "tasks",
+      "atlas": "primitive:tasks",
+      "description": "Task records and states (pending, claimed, in_progress, blocked, done): createTask, claim/start/complete tools, blockTask/unclaimTask/assignTask helpers",
+      "region": "plans-and-tasks"
+    },
+    {
+      "tag": "git-helpers",
+      "atlas": "primitive:worktrees-and-git",
+      "description": "execSync git wrappers: isGitRepo, getRepoName, getBranch, getRepoRoot, getGitInfo, getWorktrees, getCurrentWorktree",
+      "region": "git-and-worktrees"
+    },
+    {
+      "tag": "worktrees",
+      "atlas": "primitive:worktrees-and-git",
+      "description": "The worktree registry: register/lookup worktrees, syncWorktreesFromGit, hivemind_worktree_cleanup and worktree:stale",
+      "region": "git-and-worktrees"
+    },
+    {
+      "tag": "storage",
+      "atlas": "primitive:storage",
+      "description": "Per-project SQLite: getConnection (cached WAL bun:sqlite), schema.sql and migration, HIVEMIND_BASE data dir, sequences, hivemind_setup and hivemind_reset",
+      "region": "storage-and-primitives"
+    },
+    {
+      "tag": "ids",
+      "atlas": "primitive:ids",
+      "description": "Hivemind ids {prefix}_{6hex}[_{label}] for agt/pln/tsk/evt/wkt: makeXId, sanitizeLabel, parseId, typed ids",
+      "region": "storage-and-primitives"
+    },
+    {
+      "tag": "timestamps",
+      "atlas": "primitive:timestamps",
+      "description": "Local yyyy/mm/dd hh:mm:ss TZ timestamps: now, formatDatetime, parseDatetime, isStale",
+      "region": "storage-and-primitives"
+    }
+  ],
+  "regions": [
+    {
+      "id": "mcp-server",
+      "tokens": 6078,
+      "recogniseTokens": 1003,
+      "concepts": [
+        "mcp-tools",
+        "mcp-transports"
+      ],
+      "runsAgreed": 2
+    },
+    {
+      "id": "claude-code-integration",
+      "tokens": 7882,
+      "recogniseTokens": 1372,
+      "concepts": [
+        "session-start-hook",
+        "install-and-init",
+        "cli",
+        "dev-runtime"
+      ],
+      "runsAgreed": 2
+    },
+    {
+      "id": "agents-and-liveness",
+      "tokens": 10486,
+      "recogniseTokens": 1722,
+      "concepts": [
+        "agent-registry",
+        "agent-liveness",
+        "coordinator"
+      ],
+      "runsAgreed": 3
+    },
+    {
+      "id": "event-log",
+      "tokens": 5452,
+      "recogniseTokens": 1058,
+      "concepts": [
+        "event-log"
+      ],
+      "runsAgreed": 2
+    },
+    {
+      "id": "plans-and-tasks",
+      "tokens": 8227,
+      "recogniseTokens": 1514,
+      "concepts": [
+        "plan-sync",
+        "tasks"
+      ],
+      "runsAgreed": 3
+    },
+    {
+      "id": "git-and-worktrees",
+      "tokens": 5437,
+      "recogniseTokens": 1065,
+      "concepts": [
+        "git-helpers",
+        "worktrees"
+      ],
+      "runsAgreed": 2
+    },
+    {
+      "id": "storage-and-primitives",
+      "tokens": 10925,
+      "recogniseTokens": 1971,
+      "concepts": [
+        "storage",
+        "ids",
+        "timestamps"
+      ],
+      "runsAgreed": 3
+    }
+  ],
+  "dropped": {
+    "doc:README.md#preface": "Project status line (Paused) and one-sentence tagline; establishes nothing to reuse or obey, every claim is restated in How It Works / Overview.",
+    "doc:README.md#container-to-container-example": "Built around ghcr.io/inixiative/hivemind, an image with no Dockerfile in the repo (not built); its real content (HIVEMIND_REMOTE_URL on agents) is covered by README#environment-variables and ARCHITECTURE#core-components"
+  }
+}
